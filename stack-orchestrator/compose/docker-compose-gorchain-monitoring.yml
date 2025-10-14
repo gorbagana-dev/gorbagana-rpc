@@ -1,0 +1,51 @@
+services:
+  influxdb:
+    image: gorbagana/influxdb:local
+    restart: unless-stopped
+    hostname: influxdb
+    environment:
+      - INFLUXDB_DB=agave_metrics
+      - INFLUXDB_HTTP_AUTH_ENABLED=true
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin
+      - INFLUXDB_REPORTING_DISABLED=true
+    volumes:
+      - gorchain_influxdb_data:/var/lib/influxdb
+    ports:
+      - "8086:8086"
+    networks:
+      - gorchain
+      - monitoring
+
+  grafana:
+    image: gorbagana/grafana:local
+    restart: unless-stopped
+    hostname: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - ../config/gorchain-monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ../config/gorchain-monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - gorchain_grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - influxdb
+
+networks:
+  monitoring:
+    driver: bridge
+  gorchain:
+    name: gorchain
+    external: true
+
+volumes:
+  gorchain_influxdb_data:
+  gorchain_grafana_data:

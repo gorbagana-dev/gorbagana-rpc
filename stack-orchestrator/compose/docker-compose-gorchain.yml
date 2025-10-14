@@ -1,0 +1,63 @@
+services:
+  agave-validator:
+    image: gorbagana/gorchain-validator:local
+    restart: unless-stopped
+    hostname: agave-validator
+    environment:
+      - CLUSTER_TYPE=testnet
+      - RUST_LOG=info
+      - FAUCET_LAMPORTS=500000000000000000
+      - RPC_PORT=8899
+      - FAUCET_PORT=9900
+      - GOSSIP_PORT=8001
+      - ENABLE_FAUCET=true
+      - SOLANA_METRICS_CONFIG=host=http://influxdb:8086,db=agave_metrics,u=admin,p=admin
+    volumes:
+      - gorchain_config:/agave/config
+      - gorchain_ledger:/agave/ledger
+      - gorchain_accounts:/agave/accounts
+    ports:
+      - "8899:8899"
+      - "8900:8900"
+      - "8001:8001/udp"
+      - "8003:8003/udp"
+      - "9900:9900"
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8899/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  envoy-proxy:
+    image: gorbagana/envoy-proxy:local
+    restart: unless-stopped
+    hostname: envoy-proxy
+    volumes:
+      - ../config/gorchain/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    ports:
+      - "443:443"
+      - "80:80"
+      - "9901:9901"
+    depends_on:
+      agave-validator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9901/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  gorchain_config:
+  gorchain_ledger:
+  gorchain_accounts:
+
+networks:
+  default:
+    name: gorchain
