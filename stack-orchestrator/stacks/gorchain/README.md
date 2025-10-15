@@ -8,6 +8,7 @@ Gorchain validator node stack (Agave/Solana fork).
 - `RUST_LOG`: Log level
 - `FAUCET_LAMPORTS`: Amount distributed by faucet
 - `ENABLE_FAUCET`: Enable/disable faucet
+- `RESTART_INTERVAL_SECONDS`: Time between automatic validator restarts (default: 4 hours)
 
 ## Ports
 

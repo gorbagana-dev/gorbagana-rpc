@@ -3,6 +3,8 @@ services:
     image: gorbagana/gorchain-validator:local
     restart: unless-stopped
     hostname: agave-validator
+    labels:
+      - "role=validator"
     environment:
       - CLUSTER_TYPE=testnet
       - RUST_LOG=info
@@ -52,6 +54,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  restarter:
+    image: docker:cli
+    restart: unless-stopped
+    depends_on:
+      - agave-validator
+    environment:
+      RESTART_INTERVAL_SECONDS: ${RESTART_INTERVAL_SECONDS:-14400}
+    entrypoint: ["/bin/sh", "-c"]
+    command: /opt/run.sh
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../config/gorchain/restart-validator.sh:/opt/run.sh
 
 volumes:
   gorchain_config:
