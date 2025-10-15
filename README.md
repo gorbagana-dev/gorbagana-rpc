@@ -13,12 +13,16 @@
 export CERC_REPO_BASE_DIR=~/repos
 
 # 1. Fetch this stack repository
-laconic-so fetch-stack <repo-url>
-stacks=$CERC_REPO_BASE_DIR/gorchain-stack/stack-orchestrator/stacks
+git clone git@github.com:gorbagana-dev/gorchain-stacks.git ~/
+# Locate the stack definitions
+stacks=~/gorchain-stacks/stack-orchestrator/stacks
 
-# 2. Deploy gorchain validator
+# 2. Deploy gorchain validator:
+# Clone repositories into $CERC_REPO_BASE_DIR
 laconic-so --stack $stacks/gorchain setup-repositories
+# Build all needed images
 laconic-so --stack $stacks/gorchain build-containers
+# Start all services
 laconic-so --stack $stacks/gorchain deploy up
 
 # 3. Deploy monitoring (optional)
