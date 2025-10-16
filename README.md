@@ -9,6 +9,8 @@
 
 ## Quick start
 
+This will create an ephemeral deployment with data in mounted volumes:
+
 ```bash
 export CERC_REPO_BASE_DIR=~/repos
 
@@ -17,17 +19,30 @@ git clone git@github.com:gorbagana-dev/gorchain-stacks.git ~/
 # Locate the stack definitions
 stacks=~/gorchain-stacks/stack-orchestrator/stacks
 
-# 2. Deploy gorchain validator:
+# 2. Build images:
 # Clone repositories into $CERC_REPO_BASE_DIR
+# (this can be skipped if gorchain repo is already cloned)
 laconic-so --stack $stacks/gorchain setup-repositories
 # Build all needed images
 laconic-so --stack $stacks/gorchain build-containers
-# Start all services
+
+# 3. Start all services
 laconic-so --stack $stacks/gorchain deploy up
 
-# 3. Deploy monitoring (optional)
+# Deploy monitoring (optional)
 laconic-so --stack $stacks/gorchain-monitoring build-containers
 laconic-so --stack $stacks/gorchain-monitoring deploy up
+```
+
+To create a persistent deployment with filesystem-mounted data:
+
+```bash
+# Instantiate a deployment spec based on the stack
+laconic-so --stack $stacks/gorchain deploy init --output ./spec.yml
+# Create a deployment directory from the spec
+laconic-so --stack $stacks/gorchain deploy create --spec-file ./spec.yml --deployment-dir ./deployment
+# Start all services
+laconic-so deployment --dir ./deployment start
 ```
 
 ## Testing
