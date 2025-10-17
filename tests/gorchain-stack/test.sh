@@ -55,11 +55,42 @@ if [ ! -f "$test_deployment_spec" ]; then
   fail_exit "deploy init test: spec file not present"
 fi
 
-$SO_COMMAND --stack ${stack_path} deploy create --spec-file $test_deployment_spec --deployment-dir $test_deployment_dir
+# Generate test SSL certificates
+test_cert_dir=$test_workdir/certs
+mkdir -p $test_cert_dir
+log_info "Generating test SSL certificates"
+openssl req -x509 -newkey rsa:2048 -nodes \
+  -keyout $test_cert_dir/test-privkey.pem \
+  -out $test_cert_dir/test-cert.pem \
+  -days 1 \
+  -subj "/CN=test.localhost/O=Test" > /dev/null 2>&1
+
+if [ ! -f "$test_cert_dir/test-cert.pem" ] || [ ! -f "$test_cert_dir/test-privkey.pem" ]; then
+  fail_exit "SSL certificate generation failed"
+fi
+log_info "SSL certificates generated"
+
+$SO_COMMAND --stack ${stack_path} deploy create \
+  --spec-file $test_deployment_spec \
+  --deployment-dir $test_deployment_dir \
+  -- \
+  --certificate-file $test_cert_dir/test-cert.pem \
+  --private-key-file $test_cert_dir/test-privkey.pem
+
 # Check the deployment dir exists
 if [ ! -d "$test_deployment_dir" ]; then
   fail_exit "deploy create test: deployment directory not present"
 fi
+
+# Check SSL cert files were copied to deployment config
+if [ ! -f "$test_deployment_dir/config/origin.cert.pem" ]; then
+  fail_exit "deploy create test: SSL certificate not copied to deployment config"
+fi
+
+if [ ! -f "$test_deployment_dir/config/origin.key" ]; then
+  fail_exit "deploy create test: SSL private key not copied to deployment config"
+fi
+
 log_info "deploy create test: passed"
 
 $SO_COMMAND deployment --dir $test_deployment_dir start
@@ -132,14 +163,52 @@ log_info "Subsequent slot: $subsequent_slot"
 log_info "Slot difference: $slot_difference"
 
 # Slot difference should be at least 10
-if [[ $slot_difference -ge 10 ]]; then
-  log_info "Test passed: validator is producing slots"
-  test_result=0
-else
+if [[ $slot_difference -lt 10 ]]; then
   log_info "Test failed: slots did not progress sufficiently (initial: ${initial_slot}, subsequent: ${subsequent_slot})"
   log_info "Logs from stack:"
   $SO_COMMAND deployment --dir $test_deployment_dir logs
-  test_result=1
+  exit 1
 fi
 
-exit $test_result
+log_info "Test passed: validator is producing slots"
+
+# Check RPC node health and response
+log_info "Checking RPC node health"
+timeout=300
+start_time=$(date +%s)
+elapsed_time=0
+rpc_healthy=false
+
+while [ "$rpc_healthy" = false ] && [ $elapsed_time -lt $timeout ]; do
+  sleep 10
+  log_info "Waiting for RPC node to be healthy..."
+
+  if $SO_COMMAND deployment --dir $test_deployment_dir exec agave-rpc "curl -sf http://localhost:8899/health" > /dev/null 2>&1; then
+    rpc_healthy=true
+    log_info "RPC node health check passed"
+  fi
+
+  current_time=$(date +%s)
+  elapsed_time=$((current_time - start_time))
+done
+
+if [ "$rpc_healthy" = false ]; then
+  fail_exit "RPC node did not become healthy within $timeout seconds"
+fi
+
+# Test RPC node getSlot response
+log_info "Testing RPC node getSlot method"
+rpc_slot=$($SO_COMMAND deployment --dir $test_deployment_dir exec agave-rpc \
+  "curl -s -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSlot\"}' http://localhost:8899" \
+  | grep -o '"result":[0-9]*' | grep -o '[0-9]*' || echo "0")
+
+log_info "RPC node slot: $rpc_slot"
+
+if [ "$rpc_slot" -eq 0 ]; then
+  fail_exit "RPC node did not return valid slot number"
+fi
+
+log_info "RPC node tests passed"
+log_info "All tests passed"
+
+exit 0

@@ -4,7 +4,8 @@ description: "Gorchain validator node (Agave/Solana fork)"
 repos:
   - github.com/gorbagana-dev/gorchain
 containers:
+  - gorbagana/gorchain-base
   - gorbagana/gorchain-validator
-  - gorbagana/envoy-proxy
+  - gorbagana/gorchain-rpc
 pods:
   - gorchain

@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
-# Build gorbagana/gorchain-validator
-
 source ${CERC_CONTAINER_BASE_DIR}/build-base.sh
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-# Use the Dockerfile from the gorchain repo
 GORCHAIN_REPO=${CERC_REPO_BASE_DIR}/gorchain
 
 if [ ! -d "$GORCHAIN_REPO" ]; then
@@ -13,7 +9,7 @@ if [ ! -d "$GORCHAIN_REPO" ]; then
   exit 1
 fi
 
-docker build -t gorbagana/gorchain-validator:local \
+docker build -t gorbagana/gorchain-base:local \
   -f ${SCRIPT_DIR}/Dockerfile \
   ${build_command_args} \
   ${GORCHAIN_REPO}
