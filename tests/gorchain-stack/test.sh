@@ -83,11 +83,11 @@ if [ ! -d "$test_deployment_dir" ]; then
 fi
 
 # Check SSL cert files were copied to deployment config
-if [ ! -f "$test_deployment_dir/config/origin.cert.pem" ]; then
+if [ ! -f "$test_deployment_dir/config/certs/origin.cert.pem" ]; then
   fail_exit "deploy create test: SSL certificate not copied to deployment config"
 fi
 
-if [ ! -f "$test_deployment_dir/config/origin.key" ]; then
+if [ ! -f "$test_deployment_dir/config/certs/origin.key" ]; then
   fail_exit "deploy create test: SSL private key not copied to deployment config"
 fi
 

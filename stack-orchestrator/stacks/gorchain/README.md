@@ -2,6 +2,21 @@
 
 Gorchain validator node stack (Agave/Solana fork).
 
+## Deployment
+
+This stack has a custom `create` command that requires SSL certificate files:
+
+```bash
+laconic-so --stack ./stack-orchestrator/stacks/gorchain deploy create \
+  --spec-file spec.yml \
+  --deployment-dir ./deployment \
+  -- \
+  --certificate-file /path/to/cert.pem \
+  --private-key-file /path/to/privkey.pem
+```
+
+The certificate and private key files are copied to the deployment config directory and mounted into the Envoy proxy container for HTTPS support.
+
 ## Configuration
 
 - `CLUSTER_TYPE`: Network type (default: testnet)
@@ -23,5 +38,8 @@ Gorchain validator node stack (Agave/Solana fork).
 
 ## Notes
 
-- The validator requires TLS certificates for Envoy proxy. Mount these in the envoy-proxy service volumes.
+> [!WARNING]
+> A TLS certificate is required for the Envoy proxy. A self-signed placeholder certificate is bind
+> mounted for development purposes.  For production, use certificates from a trusted CA.
+
 - Metrics are exported to InfluxDB (if gorchain-monitoring stack is running).

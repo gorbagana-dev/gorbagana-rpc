@@ -82,8 +82,8 @@ services:
         condition: service_healthy
     volumes:
       - ../config/gorchain/envoy.yaml:/etc/envoy/envoy.yaml:ro
-      - ../config/origin.cert.pem:/etc/envoy/tls/origin.cert.pem:ro
-      - ../config/origin.key:/etc/envoy/tls/origin.key:ro
+      - ../config/gorchain/dev-certs/dev-cert.pem:/etc/envoy/tls/origin.cert.pem:ro
+      - ../config/gorchain/dev-certs/dev-private-key.pem:/etc/envoy/tls/origin.key:ro
     ports:
       - "443:443"
       - "80:80"

@@ -9,7 +9,10 @@
 
 ## Quick start
 
-This will create an ephemeral deployment with data in mounted volumes:
+This will create an ephemeral deployment with data in mounted volumes for development.
+
+**Note:** this will use a self-signed development certificate by default. Create a persistent
+deployment to use a trusted TLS cert.
 
 ```bash
 export CERC_REPO_BASE_DIR=~/repos
@@ -26,7 +29,7 @@ laconic-so --stack $stacks/gorchain setup-repositories
 # Build all needed images
 laconic-so --stack $stacks/gorchain build-containers
 
-# 3. Start all services
+# 3. Deploy services
 laconic-so --stack $stacks/gorchain deploy up
 
 # Deploy monitoring (optional)
@@ -39,8 +42,16 @@ To create a persistent deployment with filesystem-mounted data:
 ```bash
 # Instantiate a deployment spec based on the stack
 laconic-so --stack $stacks/gorchain deploy init --output ./spec.yml
+
 # Create a deployment directory from the spec
-laconic-so --stack $stacks/gorchain deploy create --spec-file ./spec.yml --deployment-dir ./deployment
+# Note: SSL certificate and private key files are required
+laconic-so --stack $stacks/gorchain deploy create \
+  --spec-file ./spec.yml \
+  --deployment-dir ./deployment \
+  -- \
+  --certificate-file /path/to/cert.pem \
+  --private-key-file /path/to/privkey.pem
+
 # Start all services
 laconic-so deployment --dir ./deployment start
 ```
