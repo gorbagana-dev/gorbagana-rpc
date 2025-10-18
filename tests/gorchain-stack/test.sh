@@ -209,6 +209,35 @@ if [ "$rpc_slot" -eq 0 ]; then
 fi
 
 log_info "RPC node tests passed"
+
+# Check envoy proxy (from host since curl isn't on envoy container)
+log_info "Checking envoy proxy"
+
+# Check HTTP endpoint (port 80)
+if ! curl -sf http://localhost:80/health > /dev/null 2>&1; then
+  fail_exit "Envoy proxy HTTP endpoint not responding"
+fi
+log_info "Envoy proxy HTTP endpoint responding"
+
+# Check HTTPS endpoint (port 443) - use -k to skip cert verification since it's self-signed
+if ! curl -sfk https://localhost:443/health > /dev/null 2>&1; then
+  fail_exit "Envoy proxy HTTPS endpoint not responding"
+fi
+log_info "Envoy proxy HTTPS endpoint responding"
+
+# Test JSON-RPC through envoy proxy
+proxy_slot=$(curl -sfk -X POST -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"getSlot"}' \
+  https://localhost:443 \
+  | grep -o '"result":[0-9]*' | grep -o '[0-9]*' || echo "0")
+
+log_info "Envoy proxy RPC slot: $proxy_slot"
+
+if [ "$proxy_slot" -eq 0 ]; then
+  fail_exit "Envoy proxy did not return valid slot number via RPC"
+fi
+
+log_info "Envoy proxy tests passed"
 log_info "All tests passed"
 
 exit 0
