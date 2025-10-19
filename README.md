@@ -29,12 +29,16 @@ laconic-so --stack $stacks/gorchain setup-repositories
 # Build all needed images
 laconic-so --stack $stacks/gorchain build-containers
 
-# 3. Deploy services
+# 3. Start containers in background
 laconic-so --stack $stacks/gorchain deploy up
 
 # Deploy monitoring (optional)
 laconic-so --stack $stacks/gorchain-monitoring build-containers
 laconic-so --stack $stacks/gorchain-monitoring deploy up
+
+# 4. Stop and destroy containers (optionally pass --delete-volumes)
+laconic-so --stack $stacks/gorchain deploy down
+laconic-so --stack $stacks/gorchain-monitoring deploy down
 ```
 
 To create a persistent deployment with filesystem-mounted data:
@@ -52,8 +56,10 @@ laconic-so --stack $stacks/gorchain deploy create \
   --certificate-file /path/to/cert.pem \
   --private-key-file /path/to/privkey.pem
 
-# Start all services
+# Start containers
 laconic-so deployment --dir ./deployment start
+# Stop containers
+laconic-so deployment --dir ./deployment stop
 ```
 
 ## Testing

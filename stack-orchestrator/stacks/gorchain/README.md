@@ -2,6 +2,11 @@
 
 Gorchain validator node stack (Agave/Solana fork).
 
+> [!WARNING]
+> A TLS certificate is required for the Envoy proxy. When running an ephemeral cluster with `deploy
+> up`, the envoy container will use a default self-signed certificate.  This is a placeholder for
+> development purposes; for production, use certificates from a trusted CA.
+
 ## Deployment
 
 This stack has a custom `create` command that requires SSL certificate files:
@@ -37,9 +42,5 @@ The certificate and private key files are copied to the deployment config direct
 - `9901`: Envoy admin
 
 ## Notes
-
-> [!WARNING]
-> A TLS certificate is required for the Envoy proxy. A self-signed placeholder certificate is bind
-> mounted for development purposes.  For production, use certificates from a trusted CA.
 
 - Metrics are exported to InfluxDB (if gorchain-monitoring stack is running).
