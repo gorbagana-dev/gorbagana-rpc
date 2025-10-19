@@ -1,6 +1,6 @@
 services:
   influxdb:
-    image: gorbagana/influxdb:local
+    image: influxdb:1.8
     restart: unless-stopped
     hostname: influxdb
     environment:
@@ -18,7 +18,7 @@ services:
       - monitoring
 
   grafana:
-    image: gorbagana/grafana:local
+    image: grafana/grafana:latest
     restart: unless-stopped
     hostname: grafana
     environment:
