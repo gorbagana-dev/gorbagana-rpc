@@ -90,17 +90,16 @@ services:
       - "9901:9901"
 
   restarter:
-    image: docker:cli
+    image: gorbagana/gorchain-restarter:local
     restart: unless-stopped
     depends_on:
       - agave-validator
-    environment:
-      RESTART_INTERVAL_SECONDS: ${RESTART_INTERVAL_SECONDS:-14400}
-    entrypoint: ["/bin/sh", "-c"]
-    command: /opt/run.sh
+      - agave-rpc
+    command: ["/cron/restart.cron"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../config/gorchain/restart-validator.sh:/opt/run.sh
+      - ../config/gorchain/restart.cron:/cron/restart.cron:ro
+      - ../config/gorchain/restart-node.sh:/scripts/restart-node.sh:ro
 
 volumes:
   gorchain_config:

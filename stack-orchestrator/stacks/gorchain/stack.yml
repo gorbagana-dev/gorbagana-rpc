@@ -7,5 +7,6 @@ containers:
   - gorbagana/gorchain-base
   - gorbagana/gorchain-validator
   - gorbagana/gorchain-rpc
+  - gorbagana/gorchain-restarter
 pods:
   - gorchain

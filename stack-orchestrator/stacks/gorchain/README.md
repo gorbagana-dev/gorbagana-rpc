@@ -28,7 +28,15 @@ The certificate and private key files are copied to the deployment config direct
 - `RUST_LOG`: Log level
 - `FAUCET_LAMPORTS`: Amount distributed by faucet
 - `ENABLE_FAUCET`: Enable/disable faucet
-- `RESTART_INTERVAL_SECONDS`: Time between automatic validator restarts (default: 4 hours)
+
+### Automatic restarts
+
+The stack includes a `restarter` service that periodically restarts nodes to mitigate probable
+memory leaks and ensure stability. By default:
+- Validator: restarts every 4 hours at :00
+- RPC node: restarts every 6 hours at :30 (staggered to avoid simultaneous restarts)
+
+Edit deployment `config/gorchain/restart.cron` to customize the restart schedules.
 
 ## Ports
 

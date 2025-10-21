@@ -1,0 +1,12 @@
+# Gorchain node restart cron schedules
+# Format: <minute> <hour> <day-of-month> <month> <day-of-week> <command>
+#
+# Schedules:
+# - Validator: every 4 hours at :00
+# - RPC: every 6 hours at :30 (staggered to avoid simultaneous restarts)
+
+# Restart validator every 4 hours at :00
+0 */4 * * * /scripts/restart-node.sh role=validator
+
+# Restart RPC node every 6 hours at :30
+30 */6 * * * /scripts/restart-node.sh role=rpc
