@@ -1,0 +1,38 @@
+services:
+  agave-rpc:
+    image: gorbagana/gorchain-rpc:local
+    restart: unless-stopped
+    network_mode: host
+    hostname: agave-rpc
+    labels:
+      - "role=rpc"
+    environment:
+      # External validator is required
+      VALIDATOR_ENTRYPOINT: ${VALIDATOR_ENTRYPOINT}
+      KNOWN_VALIDATOR: ${KNOWN_VALIDATOR}
+      RUST_LOG: ${RUST_LOG:-info}
+      RPC_PORT: ${RPC_PORT:-8899}
+      GOSSIP_PORT: ${GOSSIP_PORT:-8001}
+      PUBLIC_IP: ${PUBLIC_IP}
+      SOLANA_METRICS_CONFIG: ${SOLANA_METRICS_CONFIG:-}
+    command: ["/opt/run.sh"]
+    volumes:
+      - ../config/gorchain/start-rpc.sh:/opt/run.sh
+      - rpc_config:/agave/config
+      - rpc_ledger:/agave/ledger
+      - rpc_accounts:/agave/accounts
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7899/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  rpc_config:
+  rpc_ledger:
+  rpc_accounts:

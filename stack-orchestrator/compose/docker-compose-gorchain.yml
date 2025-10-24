@@ -2,20 +2,23 @@ services:
   agave-validator:
     image: gorbagana/gorchain-validator:local
     restart: unless-stopped
+    network_mode: host
     hostname: agave-validator
     labels:
       - "role=validator"
     environment:
       - CLUSTER_TYPE=testnet
-      - RUST_LOG=info
+      - RUST_LOG=${RUST_LOG:-info}
       - FAUCET_LAMPORTS=500000000000000000
       - RPC_PORT=8899
       - FAUCET_PORT=9900
       - GOSSIP_PORT=8001
+      - PUBLIC_GOSSIP_HOST
+      - PUBLIC_RPC_ADDRESS
       - ENABLE_FAUCET=true
       - SNAPSHOT_INTERVAL_SLOTS=200
       - MAXIMUM_SNAPSHOTS_TO_RETAIN=5
-      - SOLANA_METRICS_CONFIG=host=http://influxdb:8086,db=agave_metrics,u=admin,p=admin
+      # - SOLANA_METRICS_CONFIG=host=http://influxdb:8086,db=agave_metrics,u=admin,p=admin
     command: ["/opt/run.sh"]
     volumes:
       - ../config/gorchain/start-validator.sh:/opt/run.sh
@@ -26,6 +29,8 @@ services:
       - "8899:8899"             # RPC
       - "8900:8900"             # RPC pubsub
       - "9900:9900"             # Faucet
+      - "8001:8001"             # Gossip
+      - "8001:8001/udp"         # Gossip
     ulimits:
       nofile:
         soft: 1000000
@@ -37,48 +42,13 @@ services:
       retries: 3
       start_period: 30s
 
-  agave-rpc:
-    image: gorbagana/gorchain-rpc:local
-    restart: unless-stopped
-    hostname: agave-rpc
-    labels:
-      - "role=rpc"
-    depends_on:
-      agave-validator:
-        condition: service_healthy
-    environment:
-      - VOTING_NODE_ENTRYPOINT=agave-validator:8001
-      - VOTING_NODE_IDENTITY=/agave/voter-config/validator-identity.json
-      - RUST_LOG=info
-      - RPC_PORT=8899
-      - GOSSIP_PORT=8001
-    command: ["/opt/run.sh"]
-    volumes:
-      - ../config/gorchain/start-rpc.sh:/opt/run.sh
-      - gorchain_config:/agave/voter-config
-      - rpc_config:/agave/config
-      - rpc_ledger:/agave/ledger
-      - rpc_accounts:/agave/accounts
-    ports:
-      - "7899:8899"             # RPC
-      - "7900:8900"             # RPC pubsub
-    ulimits:
-      nofile:
-        soft: 1000000
-        hard: 1000000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8899/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  envoy-proxy:
+  #TODO reconfig
+  envoy-proxy: 
     image: envoyproxy/envoy:v1.31-latest
     restart: unless-stopped
     hostname: envoy-proxy
     depends_on:
-      agave-rpc:
+      agave-validator:
         condition: service_healthy
     volumes:
       - ../config/gorchain/envoy.yaml:/etc/envoy/envoy.yaml:ro
@@ -94,7 +64,6 @@ services:
     restart: unless-stopped
     depends_on:
       - agave-validator
-      - agave-rpc
     command: ["/cron/restart.cron"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -105,9 +74,6 @@ volumes:
   gorchain_config:
   gorchain_ledger:
   gorchain_accounts:
-  rpc_config:
-  rpc_ledger:
-  rpc_accounts:
 
 networks:
   default:

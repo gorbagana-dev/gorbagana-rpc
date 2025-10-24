@@ -4,7 +4,8 @@
 
 ## Stacks
 
-- **gorchain**: Validator node with RPC endpoints and faucet
+- **gorchain**: Standalone voting validator node with Envoy proxy
+- **gorchain-rpc**: Standalone RPC node
 - **gorchain-monitoring**: Metrics collection and visualization (InfluxDB + Grafana)
 
 ## Quick start

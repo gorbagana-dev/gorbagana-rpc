@@ -5,17 +5,19 @@ set -e
 AGAVE_CONFIG_DIR="/agave/config"
 AGAVE_LEDGER_DIR="/agave/ledger"
 AGAVE_ACCOUNTS_DIR="/agave/accounts"
-RPC_IDENTITY="$AGAVE_CONFIG_DIR/rpc-identity.json"
+RPC_INDENTITY="$AGAVE_CONFIG_DIR/validator-identity.json"
+
+# Check required environment variables
+: ${VALIDATOR_ENTRYPOINT:?}
+: ${KNOWN_VALIDATOR:?}
 
 # Environment variables with defaults
-VOTING_NODE_ENTRYPOINT="${VOTING_NODE_ENTRYPOINT:-agave-validator:8001}"
-VOTING_NODE_IDENTITY="${VOTING_NODE_IDENTITY:-/agave/voter-config/validator-identity.json}"
 RPC_PORT="${RPC_PORT:-8899}"
 GOSSIP_PORT="${GOSSIP_PORT:-8001}"
 RUST_LOG="${RUST_LOG:-info}"
 
 echo "Starting Agave RPC node (non-voting)..."
-echo "Connecting to consensus validator at: ${VOTING_NODE_ENTRYPOINT}"
+echo "Connecting to external validator at: ${VALIDATOR_ENTRYPOINT}"
 
 # Create directories if they don't exist
 mkdir -p "$AGAVE_CONFIG_DIR" "$AGAVE_LEDGER_DIR" "$AGAVE_ACCOUNTS_DIR"
@@ -24,47 +26,45 @@ mkdir -p "$AGAVE_CONFIG_DIR" "$AGAVE_LEDGER_DIR" "$AGAVE_ACCOUNTS_DIR"
 sudo chown -R $(id -u):$(id -g) "$AGAVE_CONFIG_DIR" "$AGAVE_LEDGER_DIR" "$AGAVE_ACCOUNTS_DIR" 2>/dev/null || true
 
 # Generate RPC node identity if it doesn't exist
-if [ ! -f "$RPC_IDENTITY" ]; then
+if [ ! -f "$RPC_INDENTITY" ]; then
     echo "Generating RPC node identity keypair..."
-    solana-keygen new --no-passphrase --silent --force --outfile "$RPC_IDENTITY"
+    solana-keygen new --no-passphrase --silent --force --outfile "$RPC_INDENTITY"
 fi
 
-# Use known validator if passed, fall back to identity file
-if [ -z "$KNOWN_VALIDATOR" ]; then
-  if [ -f "$VOTING_NODE_IDENTITY" ]; then
-    KNOWN_VALIDATOR="$(solana-keygen pubkey "$VOTING_NODE_IDENTITY" 2>/dev/null)"
-  else
-    echo "Error: KNOWN_VALIDATOR not set and voting node identity file not found at $VOTING_NODE_IDENTITY"
-    exit 1
-  fi
-fi
-
-# RPC node arguments
 echo "Configuring RPC node arguments..."
 RPC_ARGS=(
-    --identity "$RPC_IDENTITY"
+    --identity "$RPC_INDENTITY"
     --known-validator "$KNOWN_VALIDATOR"
     --no-voting                                    # RPC node: no voting
-    --entrypoint "$VOTING_NODE_ENTRYPOINT"         # Connect to consensus validator
+    --entrypoint "$VALIDATOR_ENTRYPOINT"         # Connect to consensus validator
     --ledger "$AGAVE_LEDGER_DIR"
     --accounts "$AGAVE_ACCOUNTS_DIR"
     --log -
     --full-rpc-api                                 # Full public RPC
     --rpc-port "$RPC_PORT"
-    --rpc-bind-address 0.0.0.0                     # Public RPC access
+    --rpc-bind-address 0.0.0.0                     # Bind to all interfaces
     --dynamic-port-range 9000-9025
     --gossip-port "$GOSSIP_PORT"
     --private-rpc
     --only-known-rpc                               # Only bootstrap from known validators
-    --allow-private-addr                           # Allow private network addresses
-    --enable-rpc-transaction-history               # Full transaction history
-    --rpc-pubsub-enable-block-subscription         # WebSocket subscriptions
-    --enable-extended-tx-metadata-storage          # Extended metadata
+    --allow-private-addr # Allow for testing
+    --enable-rpc-transaction-history
+    --rpc-pubsub-enable-block-subscription
+    --enable-extended-tx-metadata-storage
     --no-wait-for-vote-to-start-leader             # Start RPC immediately
     --no-os-network-limits-test
     --wal-recovery-mode skip_any_corrupted_record
     --limit-ledger-size                            # Limit disk usage
 )
+
+# Get RPC's public IP for gossip advertising
+if [[ -n "$PUBLIC_IP" ]]; then
+  RPC_ARGS+=(
+    --gossip-host "$PUBLIC_IP"
+    --bind-address 0.0.0.0
+  )
+  echo "Public IP for gossip: ${PUBLIC_IP}"
+fi
 
 echo "RPC node args: ${RPC_ARGS[@]}"
 exec agave-validator "${RPC_ARGS[@]}"

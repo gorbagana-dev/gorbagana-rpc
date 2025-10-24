@@ -16,7 +16,10 @@ FAUCET_LAMPORTS="${FAUCET_LAMPORTS:-500000000000000000}"
 RPC_PORT="${RPC_PORT:-8899}"
 FAUCET_PORT="${FAUCET_PORT:-9900}"
 GOSSIP_PORT="${GOSSIP_PORT:-8001}"
-INIT_COMPLETE_FILE="${INIT_COMPLETE_FILE:-}"  # Optional file to create when validator is ready
+# Public addresses default to Docker internal hosts
+PUBLIC_GOSSIP_HOST="${PUBLIC_GOSSIP_HOST:-agave-validator}"
+PUBLIC_RPC_ADDRESS="${PUBLIC_RPC_ADDRESS:-agave-validator:$RPC_PORT}"
+INIT_COMPLETE_FILE="${INIT_COMPLETE_FILE:-}" # Optional file to create when validator is ready
 
 echo "Starting Agave validator..."
 echo "Cluster type: $CLUSTER_TYPE"
@@ -434,10 +437,10 @@ VALIDATOR_ARGS=(
     --log -
     --full-rpc-api
     --rpc-port "$RPC_PORT"
-    --rpc-bind-address 0.0.0.0     # Bind to all interfaces (Docker network only)
+    --rpc-bind-address 0.0.0.0  # Bind to all interfaces
     --gossip-port "$GOSSIP_PORT"
-    --gossip-host agave-validator
-    --public-rpc-address "agave-validator:$RPC_PORT"
+    --gossip-host "$PUBLIC_GOSSIP_HOST"  # Advertise public IP/hostname for external discovery
+    --public-rpc-address "$PUBLIC_RPC_ADDRESS"
     --allow-private-addr
     --enable-rpc-transaction-history
     --rpc-pubsub-enable-block-subscription

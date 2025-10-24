@@ -1,0 +1,10 @@
+version: "1.1"
+name: gorchain-rpc
+description: "Gorchain RPC node - connects to external validator"
+repos:
+  - github.com/gorbagana-dev/gorchain
+containers:
+  - gorbagana/gorchain-base
+  - gorbagana/gorchain-rpc
+pods:
+  - gorchain-rpc
