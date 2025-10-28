@@ -21,12 +21,19 @@ services:
       - rpc_config:/agave/config
       - rpc_ledger:/agave/ledger
       - rpc_accounts:/agave/accounts
+    ports:
+      # This runs on the host network, so these are only for documentation
+      - "${RPC_PORT:-8899}"             # RPC
+      - "${RPC_WS_PORT:-8900}"          # RPC pubsub
+      - "${GOSSIP_PORT:-8001}"          # Gossip
+      - "${GOSSIP_PORT:-8001}/udp"      # Gossip
+      - "9000-9025/udp"            # Dynamic gossip ports
     ulimits:
       nofile:
         soft: 1000000
         hard: 1000000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7899/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${RPC_PORT:-8899}/health"]
       interval: 30s
       timeout: 10s
       retries: 3

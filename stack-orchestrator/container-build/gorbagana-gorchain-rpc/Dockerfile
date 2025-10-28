@@ -10,7 +10,6 @@ EXPOSE 8900/tcp
 EXPOSE 8001/udp
 EXPOSE 8001/tcp
 # Dynamic port range for RPC
-EXPOSE 9000-9025/tcp
 EXPOSE 9000-9025/udp
 
 # Health check (RPC nodes also use port 8899 internally)

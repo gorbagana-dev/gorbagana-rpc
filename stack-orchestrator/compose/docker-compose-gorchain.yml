@@ -10,9 +10,9 @@ services:
       - CLUSTER_TYPE=testnet
       - RUST_LOG=${RUST_LOG:-info}
       - FAUCET_LAMPORTS=500000000000000000
-      - RPC_PORT=8899
+      - RPC_PORT=${RPC_PORT:-8899}
       - FAUCET_PORT=9900
-      - GOSSIP_PORT=8001
+      - GOSSIP_PORT=${GOSSIP_PORT:-8001}
       - PUBLIC_GOSSIP_HOST
       - PUBLIC_RPC_ADDRESS
       - ENABLE_FAUCET=true
@@ -26,17 +26,18 @@ services:
       - gorchain_ledger:/agave/ledger
       - gorchain_accounts:/agave/accounts
     ports:
-      - "8899:8899"             # RPC
-      - "8900:8900"             # RPC pubsub
-      - "9900:9900"             # Faucet
-      - "8001:8001"             # Gossip
-      - "8001:8001/udp"         # Gossip
+      # This runs on the host network, so these are only for documentation
+      - "${RPC_PORT:-8899}"             # RPC
+      - "${RPC_WS_PORT:-8900}"          # RPC pubsub
+      - "${GOSSIP_PORT:-8001}"          # Gossip
+      - "${GOSSIP_PORT:-8001}/udp"      # Gossip
+      - "9900:9900"                     # Faucet
     ulimits:
       nofile:
         soft: 1000000
         hard: 1000000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8899/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${RPC_PORT:-8899}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
