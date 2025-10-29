@@ -43,23 +43,6 @@ services:
       retries: 3
       start_period: 30s
 
-  #TODO reconfig
-  envoy-proxy: 
-    image: envoyproxy/envoy:v1.31-latest
-    restart: unless-stopped
-    hostname: envoy-proxy
-    depends_on:
-      agave-validator:
-        condition: service_healthy
-    volumes:
-      - ../config/gorchain/envoy.yaml:/etc/envoy/envoy.yaml:ro
-      - ../config/gorchain/dev-certs/dev-cert.pem:/etc/envoy/tls/origin.cert.pem:ro
-      - ../config/gorchain/dev-certs/dev-private-key.pem:/etc/envoy/tls/origin.key:ro
-    ports:
-      - "443:443"
-      - "80:80"
-      - "9901:9901"
-
   restarter:
     image: gorbagana/gorchain-restarter:local
     restart: unless-stopped

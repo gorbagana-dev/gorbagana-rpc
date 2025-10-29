@@ -107,57 +107,6 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 
-  - name: listener_8001
-    address:
-      socket_address:
-        address: 0.0.0.0
-        port_value: 8001
-    filter_chains:
-    - filters:
-      - name: envoy.filters.network.http_connection_manager
-        typed_config:
-          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-          stat_prefix: port_8001_ingress
-          use_remote_address: true
-          upgrade_configs:
-          - upgrade_type: websocket
-          route_config:
-            name: port_8001_route
-            virtual_hosts:
-            - name: agave_8001
-              domains: ["*"]
-              routes:
-              - name: websocket_upgrade_8001
-                match:
-                  prefix: "/"
-                  headers:
-                  - name: upgrade
-                    exact_match: websocket
-                route:
-                  cluster: agave_8001
-                  timeout: 0s
-                  idle_timeout: 0s
-              - name: default_8001
-                match:
-                  prefix: "/"
-                route:
-                  cluster: agave_8001
-                  timeout: 60s
-          http_filters:
-          - name: envoy.filters.http.router
-            typed_config:
-              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-      transport_socket:
-        name: envoy.transport_sockets.tls
-        typed_config:
-          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-          common_tls_context:
-            tls_certificates:
-            - certificate_chain:
-                filename: /etc/envoy/tls/origin.cert.pem
-              private_key:
-                filename: /etc/envoy/tls/origin.key
-
   clusters:
   - name: agave_rpc
     connect_timeout: 10s
@@ -201,26 +150,6 @@ static_resources:
               socket_address:
                 address: agave-rpc
                 port_value: 8900
-    dns_lookup_family: V4_ONLY
-    typed_extension_protocol_options:
-      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-        explicit_http_config:
-          http_protocol_options: {}
-
-  - name: agave_8001
-    connect_timeout: 5s
-    type: STRICT_DNS
-    lb_policy: ROUND_ROBIN
-    load_assignment:
-      cluster_name: agave_8001
-      endpoints:
-      - lb_endpoints:
-        - endpoint:
-            address:
-              socket_address:
-                address: agave-rpc
-                port_value: 8001
     dns_lookup_family: V4_ONLY
     typed_extension_protocol_options:
       envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
