@@ -41,7 +41,7 @@ def create(context: DeploymentContext, extra_args):
         print("Warning: no private key file passed")
 
     # Update the compose file to use deployment certs instead of dev certs
-    compose_file = context.get_compose_file("gorchain")
+    compose_file = context.get_compose_file("gorchain-rpc")
 
     replacements = {
         '../config/gorchain/dev-certs/dev-cert.pem': '../config/certs/origin.cert.pem',
