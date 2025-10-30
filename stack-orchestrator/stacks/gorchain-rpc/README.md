@@ -1,17 +1,28 @@
 # Gorchain stack
 
-Gorchain voting validator node stack.
+Gorchain RPC node stack.
+
+> [!WARNING]
+> A TLS certificate is required for the Envoy proxy. When running an ephemeral cluster with `deploy
+> up`, the envoy container will use a default self-signed certificate.  This is a placeholder for
+> development purposes; for production, use certificates from a trusted CA.
 
 ## Deployment
 
+This stack has a custom `create` command that requires SSL certificate files:
+
 ```bash
-laconic-so --stack ./stack-orchestrator/stacks/gorchain deploy create \
+laconic-so --stack ./stack-orchestrator/stacks/gorchain-rpc deploy create \
   --spec-file spec.yml \
-  --deployment-dir ./deployment
+  --deployment-dir ./deployment \
+  -- \
+  --certificate-file /path/to/cert.pem \
+  --private-key-file /path/to/privkey.pem
 ```
 
-## Configuration
+The certificate and private key files are copied to the deployment config directory and mounted into the Envoy proxy container for HTTPS support.
 
+## Configuration
 <!-- TODO finish -->
 
 - `CLUSTER_TYPE`: Network type (default: testnet)
@@ -20,8 +31,7 @@ laconic-so --stack ./stack-orchestrator/stacks/gorchain deploy create \
 - `ENABLE_FAUCET`: Enable/disable faucet
 - `RPC_PORT`, `RPC_WS_PORT`: RPC and websocket pubsub ports
 - `GOSSIP_PORT`
-- `PUBLIC_RPC_ADDRESS`
-- `PUBLIC_GOSSIP_HOST`
+- `VALIDATOR_ENTRYPOINT`
 - `SOLANA_METRICS_CONFIG`: Metrics output config. To output to `gorchain-monitoring` influxdb, set
   to `host=http://influxdb:8086,db=agave_metrics,u=admin,p=admin`.
 
@@ -40,8 +50,10 @@ Edit deployment `config/gorchain/restart.cron` to customize the restart schedule
 - `8899`: RPC JSON
 - `8900`: RPC pubsub
 - `8001/udp`: Gossip
-- `8003/udp`: TPU
-- `9900`: Faucet
+
+- `443`: HTTPS (via Envoy)
+- `80`: HTTP redirect
+- `9901`: Envoy admin
 
 ## Notes
 
