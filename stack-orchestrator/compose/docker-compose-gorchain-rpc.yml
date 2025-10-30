@@ -13,7 +13,7 @@ services:
       RUST_LOG: ${RUST_LOG:-info}
       RPC_PORT: ${RPC_PORT:-8899}
       GOSSIP_PORT: ${GOSSIP_PORT:-8001}
-      PUBLIC_IP: ${PUBLIC_IP}
+      PUBLIC_IP: ${PUBLIC_IP}   # TODO not useful at all?
       SOLANA_METRICS_CONFIG: ${SOLANA_METRICS_CONFIG:-}
     command: ["/opt/run.sh"]
     volumes:
@@ -38,6 +38,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    extra_hosts:
+      # For convenience and documentation
+      influxdb: 127.0.0.1
 
   envoy-proxy:
     image: envoyproxy/envoy:v1.31-latest

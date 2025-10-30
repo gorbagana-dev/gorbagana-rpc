@@ -18,7 +18,7 @@ services:
       - ENABLE_FAUCET=true
       - SNAPSHOT_INTERVAL_SLOTS=200
       - MAXIMUM_SNAPSHOTS_TO_RETAIN=5
-      # - SOLANA_METRICS_CONFIG=host=http://influxdb:8086,db=agave_metrics,u=admin,p=admin
+      - SOLANA_METRICS_CONFIG
     command: ["/opt/run.sh"]
     volumes:
       - ../config/gorchain/start-validator.sh:/opt/run.sh
@@ -42,6 +42,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    extra_hosts:
+      # For convenience and documentation
+      influxdb: 127.0.0.1
 
   restarter:
     image: gorbagana/gorchain-restarter:local
