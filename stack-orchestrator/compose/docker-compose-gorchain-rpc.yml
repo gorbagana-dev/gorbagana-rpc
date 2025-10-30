@@ -60,6 +60,17 @@ services:
     extra_hosts:
       - agave-rpc:host-gateway
 
+  restarter:
+    image: gorbagana/gorchain-restarter:local
+    restart: unless-stopped
+    depends_on:
+      - agave-rpc
+    command: ["/cron/restart.cron"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../config/gorchain/restart.cron:/cron/restart.cron:ro
+      - ../config/gorchain/restart-node.sh:/scripts/restart-node.sh:ro
+
 volumes:
   rpc_config:
   rpc_ledger:
