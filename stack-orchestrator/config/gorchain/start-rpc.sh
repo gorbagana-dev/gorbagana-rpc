@@ -45,9 +45,7 @@ RPC_ARGS=(
     --rpc-bind-address 0.0.0.0                     # Bind to all interfaces
     --dynamic-port-range 9000-9025
     --gossip-port "$GOSSIP_PORT"
-    --private-rpc
     --only-known-rpc                               # Only bootstrap from known validators
-    --allow-private-addr # Allow for testing
     --enable-rpc-transaction-history
     --rpc-pubsub-enable-block-subscription
     --enable-extended-tx-metadata-storage
@@ -58,12 +56,17 @@ RPC_ARGS=(
 )
 
 # Get RPC's public IP for gossip advertising
-if [[ -n "$PUBLIC_IP" ]]; then
+if [[ -n "$PUBLIC_RPC_ADDRESS" ]]; then
   RPC_ARGS+=(
-    --gossip-host "$PUBLIC_IP"
-    --bind-address 0.0.0.0
+    --public-rpc-address "$PUBLIC_RPC_ADDRESS"
   )
-  echo "Public IP for gossip: ${PUBLIC_IP}"
+  echo "Public RPC address: $PUBLIC_RPC_ADDRESS"
+else
+  RPC_ARGS+=(
+    --private-rpc
+    --allow-private-addr
+  )
+  echo "No public RPC address set, assuming private RPC node"
 fi
 
 echo "RPC node args: ${RPC_ARGS[@]}"
