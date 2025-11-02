@@ -424,6 +424,8 @@ if [[ "${ENABLE_FAUCET:-true}" == "true" && -f "$FAUCET_KEYPAIR" ]]; then
     fi
 fi
 
+echo "Node identity (pubkey): $(solana-keygen pubkey "$VALIDATOR_IDENTITY")"
+
 # Get the known validator public key for the validator argument
 KNOWN_VALIDATOR_PUBKEY=$(solana-keygen pubkey "$KNOWN_VALIDATOR_KEYPAIR")
 

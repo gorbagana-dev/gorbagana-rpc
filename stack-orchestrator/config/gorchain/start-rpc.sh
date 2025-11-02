@@ -31,6 +31,8 @@ if [ ! -f "$RPC_INDENTITY" ]; then
     solana-keygen new --no-passphrase --silent --force --outfile "$RPC_INDENTITY"
 fi
 
+echo "Node identity (pubkey): $(solana-keygen pubkey "$RPC_INDENTITY")"
+
 echo "Configuring RPC node arguments..."
 RPC_ARGS=(
     --identity "$RPC_INDENTITY"
