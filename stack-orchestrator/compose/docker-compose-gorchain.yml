@@ -13,6 +13,7 @@ services:
       - RPC_PORT=${RPC_PORT:-8899}
       - FAUCET_PORT=9900
       - GOSSIP_PORT=${GOSSIP_PORT:-8001}
+      - DYNAMIC_PORT_RANGE=${DYNAMIC_PORT_RANGE:-9050-9075}
       - PUBLIC_GOSSIP_HOST
       - PUBLIC_RPC_ADDRESS
       - ENABLE_FAUCET=true
@@ -32,6 +33,7 @@ services:
       - "${GOSSIP_PORT:-8001}"          # Gossip
       - "${GOSSIP_PORT:-8001}/udp"      # Gossip
       - "9900:9900"                     # Faucet
+      - "${DYNAMIC_PORT_RANGE:-9050-9075}/udp"     # Dynamically assigned ports
     ulimits:
       nofile:
         soft: 1000000

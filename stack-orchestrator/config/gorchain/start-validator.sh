@@ -13,13 +13,19 @@ VALIDATOR_STAKE_ACCOUNT="$AGAVE_CONFIG_DIR/validator-stake-account.json"
 CLUSTER_TYPE="${CLUSTER_TYPE:-testnet}"
 RUST_LOG="${RUST_LOG:-info}"
 FAUCET_LAMPORTS="${FAUCET_LAMPORTS:-500000000000000000}"
-RPC_PORT="${RPC_PORT:-8899}"
 FAUCET_PORT="${FAUCET_PORT:-9900}"
-GOSSIP_PORT="${GOSSIP_PORT:-8001}"
-# Public addresses default to Docker internal hosts
-PUBLIC_GOSSIP_HOST="${PUBLIC_GOSSIP_HOST:-agave-validator}"
-PUBLIC_RPC_ADDRESS="${PUBLIC_RPC_ADDRESS:-agave-validator:$RPC_PORT}"
-INIT_COMPLETE_FILE="${INIT_COMPLETE_FILE:-}" # Optional file to create when validator is ready
+
+# Defaults for these are set in compose file
+: ${RPC_PORT:?}
+: ${GOSSIP_PORT:?}
+: ${DYNAMIC_PORT_RANGE:?}
+: ${PUBLIC_GOSSIP_HOST:?}
+
+# Public RPC address is published to gossip peers
+PUBLIC_RPC_ADDRESS="${PUBLIC_RPC_ADDRESS:-$PUBLIC_GOSSIP_HOST:$RPC_PORT}"
+
+# Optional file to create when validator is ready
+INIT_COMPLETE_FILE="${INIT_COMPLETE_FILE:-}"
 
 echo "Starting Agave validator..."
 echo "Cluster type: $CLUSTER_TYPE"
@@ -442,6 +448,7 @@ VALIDATOR_ARGS=(
     --rpc-bind-address 0.0.0.0  # Bind to all interfaces
     --gossip-port "$GOSSIP_PORT"
     --gossip-host "$PUBLIC_GOSSIP_HOST"  # Advertise public IP/hostname for external discovery
+    --dynamic-port-range "$DYNAMIC_PORT_RANGE"
     --public-rpc-address "$PUBLIC_RPC_ADDRESS"
     --allow-private-addr
     --enable-rpc-transaction-history

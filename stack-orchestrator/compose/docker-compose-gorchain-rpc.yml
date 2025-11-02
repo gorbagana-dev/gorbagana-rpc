@@ -7,14 +7,15 @@ services:
     labels:
       - "role=rpc"
     environment:
+      RUST_LOG: $RUST_LOG
       # External validator is required
       VALIDATOR_ENTRYPOINT: ${VALIDATOR_ENTRYPOINT}
       KNOWN_VALIDATOR: ${KNOWN_VALIDATOR}
-      RUST_LOG: ${RUST_LOG:-info}
       RPC_PORT: ${RPC_PORT:-8899}
       GOSSIP_PORT: ${GOSSIP_PORT:-8001}
-      SOLANA_METRICS_CONFIG: ${SOLANA_METRICS_CONFIG:-}
+      DYNAMIC_PORT_RANGE: ${DYNAMIC_PORT_RANGE:-9000-9025}
       PUBLIC_RPC_ADDRESS: ${PUBLIC_RPC_ADDRESS}
+      SOLANA_METRICS_CONFIG: ${SOLANA_METRICS_CONFIG}
     command: ["/opt/run.sh"]
     volumes:
       - ../config/gorchain/start-rpc.sh:/opt/run.sh
@@ -27,7 +28,7 @@ services:
       - "${RPC_WS_PORT:-8900}"          # RPC pubsub
       - "${GOSSIP_PORT:-8001}"          # Gossip
       - "${GOSSIP_PORT:-8001}/udp"      # Gossip
-      - "9000-9025/udp"            # Dynamic gossip ports
+      - "${DYNAMIC_PORT_RANGE:-9000-9025}/udp"     # Dynamically assigned ports
     ulimits:
       nofile:
         soft: 1000000

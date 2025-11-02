@@ -11,9 +11,12 @@ RPC_INDENTITY="$AGAVE_CONFIG_DIR/validator-identity.json"
 : ${VALIDATOR_ENTRYPOINT:?}
 : ${KNOWN_VALIDATOR:?}
 
+# Defaults for these set in compose file
+: ${RPC_PORT:?}
+: ${GOSSIP_PORT:?}
+: ${DYNAMIC_PORT_RANGE:?}
+
 # Environment variables with defaults
-RPC_PORT="${RPC_PORT:-8899}"
-GOSSIP_PORT="${GOSSIP_PORT:-8001}"
 RUST_LOG="${RUST_LOG:-info}"
 
 echo "Starting Agave RPC node (non-voting)..."
@@ -45,8 +48,8 @@ RPC_ARGS=(
     --full-rpc-api                                 # Full public RPC
     --rpc-port "$RPC_PORT"
     --rpc-bind-address 0.0.0.0                     # Bind to all interfaces
-    --dynamic-port-range 9000-9025
     --gossip-port "$GOSSIP_PORT"
+    --dynamic-port-range "$DYNAMIC_PORT_RANGE"
     --only-known-rpc                               # Only bootstrap from known validators
     --enable-rpc-transaction-history
     --rpc-pubsub-enable-block-subscription
