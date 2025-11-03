@@ -52,7 +52,6 @@ RPC_ARGS=(
     --rpc-bind-address 0.0.0.0                     # Bind to all interfaces
     --gossip-port "$GOSSIP_PORT"
     --dynamic-port-range "$DYNAMIC_PORT_RANGE"
-    --only-known-rpc                               # Only bootstrap from known validators
     --enable-rpc-transaction-history
     --rpc-pubsub-enable-block-subscription
     --enable-extended-tx-metadata-storage
@@ -77,6 +76,7 @@ else
   RPC_ARGS+=(
     --private-rpc
     --allow-private-addr
+    --only-known-rpc            # Only bootstrap from known validators
   )
   echo "No public RPC address set, assuming private RPC node"
 fi
