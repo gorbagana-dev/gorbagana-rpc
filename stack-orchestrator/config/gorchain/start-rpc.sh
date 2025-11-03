@@ -11,13 +11,15 @@ RPC_INDENTITY="$AGAVE_CONFIG_DIR/validator-identity.json"
 : ${VALIDATOR_ENTRYPOINT:?}
 : ${KNOWN_VALIDATOR:?}
 
-# Defaults for these set in compose file
+# Defaults for these are set in compose file
 : ${RPC_PORT:?}
 : ${GOSSIP_PORT:?}
 : ${DYNAMIC_PORT_RANGE:?}
 
 # Environment variables with defaults
 RUST_LOG="${RUST_LOG:-info}"
+SNAPSHOT_INTERVAL_SLOTS="${SNAPSHOT_INTERVAL_SLOTS:-200}"
+MAXIMUM_SNAPSHOTS_TO_RETAIN="${MAXIMUM_SNAPSHOTS_TO_RETAIN:-2}"
 
 echo "Starting Agave RPC node (non-voting)..."
 echo "Connecting to external validator at: ${VALIDATOR_ENTRYPOINT}"
@@ -58,6 +60,11 @@ RPC_ARGS=(
     --no-os-network-limits-test
     --wal-recovery-mode skip_any_corrupted_record
     --limit-ledger-size                            # Limit disk usage
+    # Snapshot configuration for RPC node bootstrap
+    # Set low intervals for dev/test to quickly create snapshots
+    --full-snapshot-interval-slots "$SNAPSHOT_INTERVAL_SLOTS"
+    --maximum-full-snapshots-to-retain "$MAXIMUM_SNAPSHOTS_TO_RETAIN"
+    --no-incremental-snapshots
 )
 
 # Get RPC's public IP for gossip advertising

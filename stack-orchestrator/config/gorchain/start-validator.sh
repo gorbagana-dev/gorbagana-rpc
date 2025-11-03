@@ -14,6 +14,8 @@ CLUSTER_TYPE="${CLUSTER_TYPE:-testnet}"
 RUST_LOG="${RUST_LOG:-info}"
 FAUCET_LAMPORTS="${FAUCET_LAMPORTS:-500000000000000000}"
 FAUCET_PORT="${FAUCET_PORT:-9900}"
+SNAPSHOT_INTERVAL_SLOTS="${SNAPSHOT_INTERVAL_SLOTS:-200}"
+MAXIMUM_SNAPSHOTS_TO_RETAIN="${MAXIMUM_SNAPSHOTS_TO_RETAIN:-2}"
 
 # Defaults for these are set in compose file
 : ${RPC_PORT:?}
@@ -458,8 +460,8 @@ VALIDATOR_ARGS=(
     --no-os-network-limits-test
     # Snapshot configuration for RPC node bootstrap
     # Set low intervals for dev/test to quickly create snapshots
-    --full-snapshot-interval-slots "${SNAPSHOT_INTERVAL_SLOTS:-200}"
-    --maximum-full-snapshots-to-retain "${MAXIMUM_SNAPSHOTS_TO_RETAIN:-2}"
+    --full-snapshot-interval-slots "$SNAPSHOT_INTERVAL_SLOTS"
+    --maximum-full-snapshots-to-retain "$MAXIMUM_SNAPSHOTS_TO_RETAIN"
     --no-incremental-snapshots
 )
 
