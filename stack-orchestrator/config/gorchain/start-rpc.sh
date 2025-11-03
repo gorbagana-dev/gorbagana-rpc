@@ -64,6 +64,8 @@ RPC_ARGS=(
     --full-snapshot-interval-slots "$SNAPSHOT_INTERVAL_SLOTS"
     --maximum-full-snapshots-to-retain "$MAXIMUM_SNAPSHOTS_TO_RETAIN"
     --no-incremental-snapshots
+    # Restrict repair requests to the known validator
+    --repair-validator "$KNOWN_VALIDATOR"
 )
 
 # Get RPC's public IP for gossip advertising
