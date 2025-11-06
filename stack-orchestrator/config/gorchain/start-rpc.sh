@@ -83,5 +83,13 @@ else
   echo "No public RPC address set, assuming private RPC node"
 fi
 
+# Configure faucet address for requestAirdrop RPC
+if [[ -n "$FAUCET_ADDRESS" ]]; then
+  RPC_ARGS+=(
+    --rpc-faucet-address "$FAUCET_ADDRESS"
+  )
+  echo "Faucet address configured: $FAUCET_ADDRESS"
+fi
+
 echo "RPC node args: ${RPC_ARGS[@]}"
 exec agave-validator "${RPC_ARGS[@]}"

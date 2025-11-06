@@ -35,13 +35,11 @@ memory leaks and ensure stability. By default:
 
 Edit deployment `config/gorchain/restart.cron` to customize the restart schedules.
 
-## Defaul ports
+### Faucet Configuration
 
-- `8899`: RPC JSON
-- `8900`: RPC pubsub
-- `8001/udp`: Gossip
-- `8003/udp`: TPU
-- `9900`: Faucet
+To enable token airdrops via the `requestAirdrop` RPC method, enable the faucet service with `ENABLE_FAUCET=true`.  This can also be made accessible from an RPC node by setting `FAUCET_ADDRESS` to point to this service: see [the RPC stack](../gorchain/README.md). The service's port is currently hardcoded to `9900`.
+
+The RPC node will forward airdrop requests (`requestAirdrop`) to the faucet service via TCP, receive a signed transaction, and submit it to the chain. Therefore, the port does not to be accessible except to the RPC nodes directly using it.
 
 ## Notes
 

@@ -18,6 +18,8 @@ services:
       SNAPSHOT_INTERVAL_SLOTS: ${SNAPSHOT_INTERVAL_SLOTS:-200}
       MAXIMUM_SNAPSHOTS_TO_RETAIN: ${MAXIMUM_SNAPSHOTS_TO_RETAIN:-2}
       SOLANA_METRICS_CONFIG: ${SOLANA_METRICS_CONFIG}
+      # Faucet address for requestAirdrop RPC (e.g., "127.0.0.1:9900")
+      FAUCET_ADDRESS: ${FAUCET_ADDRESS:-}
     command: ["/opt/run.sh"]
     volumes:
       - ../config/gorchain/start-rpc.sh:/opt/run.sh

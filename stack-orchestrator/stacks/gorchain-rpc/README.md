@@ -41,6 +41,7 @@ Additionally:
 - `VALIDATOR_ENTRYPOINT`: Gossip for cluster
 - `PUBLIC_RPC_ADDRESS`: RPC address advertised to cluster over gossip. If this is not set, Agave will be started as a `--private-rpc` node, and will not advertise its RPC address or accept incoming RPC connections.
 - `ENVOY_HTTPS_PORT`, `ENVOY_HTTP_PORT`: Host ports for Envoy to listen on
+- `FAUCET_ADDRESS`: (Optional) TCP address of a faucet service to enable `requestAirdrop` RPC support.
 
 ### Automatic restarts
 
