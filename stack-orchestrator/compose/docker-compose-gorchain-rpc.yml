@@ -58,8 +58,8 @@ services:
       - ../config/gorchain/dev-certs/dev-private-key.pem:/etc/envoy/tls/origin.key:ro
     ports:
       - "9901:9901"
-      - "443:443"
-      - "80:80"
+      - "${ENVOY_HTTPS_PORT:-443}:443"
+      - "${ENVOY_HTTP_PORT:-80}:80"
     extra_hosts:
       - agave-rpc:host-gateway
 
