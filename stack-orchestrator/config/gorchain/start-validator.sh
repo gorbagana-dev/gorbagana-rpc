@@ -13,7 +13,6 @@ VALIDATOR_STAKE_ACCOUNT="$AGAVE_CONFIG_DIR/validator-stake-account.json"
 CLUSTER_TYPE="${CLUSTER_TYPE:-testnet}"
 RUST_LOG="${RUST_LOG:-info}"
 FAUCET_LAMPORTS="${FAUCET_LAMPORTS:-500000000000000000}"
-FAUCET_PORT="${FAUCET_PORT:-9900}"
 SNAPSHOT_INTERVAL_SLOTS="${SNAPSHOT_INTERVAL_SLOTS:-200}"
 MAXIMUM_SNAPSHOTS_TO_RETAIN="${MAXIMUM_SNAPSHOTS_TO_RETAIN:-2}"
 
@@ -22,6 +21,9 @@ MAXIMUM_SNAPSHOTS_TO_RETAIN="${MAXIMUM_SNAPSHOTS_TO_RETAIN:-2}"
 : ${GOSSIP_PORT:?}
 : ${DYNAMIC_PORT_RANGE:?}
 : ${PUBLIC_GOSSIP_HOST:?}
+
+# Faucet port is hardcoded, just document it here
+FAUCET_PORT=9900
 
 # Public RPC address is published to gossip peers
 PUBLIC_RPC_ADDRESS="${PUBLIC_RPC_ADDRESS:-$PUBLIC_GOSSIP_HOST:$RPC_PORT}"
@@ -389,15 +391,6 @@ if [[ ! -f "$AGAVE_LEDGER_DIR/genesis.bin" && ! -f "$AGAVE_LEDGER_DIR/genesis.ta
     if [[ "${ENABLE_FAUCET:-true}" == "true" && -f "$FAUCET_KEYPAIR" ]]; then
         GENESIS_CMD+=(--faucet-lamports "$FAUCET_LAMPORTS")
         GENESIS_CMD+=(--faucet-pubkey "$FAUCET_KEYPAIR")
-    fi
-
-    # Add any additional genesis arguments (but filter out problematic ones)
-    if [[ -n "$GENESIS_ARGS" ]]; then
-        # Filter out any --faucet-pubkey arguments from GENESIS_ARGS to avoid conflicts
-        FILTERED_GENESIS_ARGS=$(echo "$GENESIS_ARGS" | sed 's/--faucet-pubkey [^ ]*//g')
-        if [[ -n "$FILTERED_GENESIS_ARGS" ]]; then
-            GENESIS_CMD+=($FILTERED_GENESIS_ARGS)
-        fi
     fi
 
     # Execute genesis creation
