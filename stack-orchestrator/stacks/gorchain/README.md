@@ -12,16 +12,17 @@ laconic-so --stack ./stack-orchestrator/stacks/gorchain deploy create \
 
 ## Configuration
 
-<!-- TODO finish -->
+Main environment variables (refer to compose file for authoritative reference and default values):
 
 - `CLUSTER_TYPE`: Network type (default: testnet)
 - `RUST_LOG`: Log level
 - `FAUCET_LAMPORTS`: Amount distributed by faucet
 - `ENABLE_FAUCET`: Enable/disable faucet
 - `RPC_PORT`, `RPC_WS_PORT`: RPC and websocket pubsub ports
-- `GOSSIP_PORT`
-- `PUBLIC_RPC_ADDRESS`
-- `PUBLIC_GOSSIP_HOST`
+- `GOSSIP_PORT`: Gossip port for TCP and UDP traffic
+- `DYNAMIC_PORT_RANGE`: Range of dynamically assigned ports for various gossip protocols
+- `PUBLIC_RPC_ADDRESS`: RPC address advertised to cluster over gossip
+- `PUBLIC_GOSSIP_HOST`: Gossip address advertised to cluster
 - `SOLANA_METRICS_CONFIG`: Metrics output config. To output to `gorchain-monitoring` influxdb, set
   to `host=http://influxdb:8086,db=agave_metrics,u=admin,p=admin`.
 
@@ -34,8 +35,7 @@ memory leaks and ensure stability. By default:
 
 Edit deployment `config/gorchain/restart.cron` to customize the restart schedules.
 
-## Ports
-<!-- TODO -->
+## Defaul ports
 
 - `8899`: RPC JSON
 - `8900`: RPC pubsub
