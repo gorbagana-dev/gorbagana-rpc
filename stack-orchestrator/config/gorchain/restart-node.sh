@@ -21,4 +21,4 @@ if [ -z "$container" ]; then
 fi
 
 echo "Restarting container with label=$label_filter (container: $container)"
-exec docker restart -s TERM "$container"
+exec docker restart -s TERM "$container" > /dev/null
