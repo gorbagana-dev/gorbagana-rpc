@@ -4,7 +4,6 @@
 
 ## Stacks
 
-- **gorchain**: Standalone voting validator node with Envoy proxy
 - **gorchain-rpc**: Standalone RPC node
 - **gorchain-monitoring**: Metrics collection and visualization (InfluxDB + Grafana)
 
@@ -16,29 +15,24 @@ This will create an ephemeral deployment with data in mounted volumes for develo
 deployment to use a trusted TLS cert.
 
 ```bash
-export CERC_REPO_BASE_DIR=~/repos
-
 # 1. Fetch this stack repository
-git clone git@github.com:gorbagana-dev/gorchain-stacks.git ~/
-# Locate the stack definitions
-stacks=~/gorchain-stacks/stack-orchestrator/stacks
+git clone https://github.com/gorbagana-dev/gorbagana-rpc
+cd gorbagana-rpc
+stacks=./stack-orchestrator/stacks
 
 # 2. Build images:
-# Clone repositories into $CERC_REPO_BASE_DIR
-# (this can be skipped if gorchain repo is already cloned)
-laconic-so --stack $stacks/gorchain setup-repositories
 # Build all needed images
-laconic-so --stack $stacks/gorchain build-containers
+laconic-so --stack $stacks/gorchain-rpc build-containers
 
 # 3. Start containers in background
-laconic-so --stack $stacks/gorchain deploy up
+laconic-so --stack $stacks/gorchain-rpc deploy --env-file ./stack-orchestrator/config/rpc.env up
 
 # Deploy monitoring (optional)
 laconic-so --stack $stacks/gorchain-monitoring build-containers
 laconic-so --stack $stacks/gorchain-monitoring deploy up
 
 # 4. Stop and destroy containers (optionally pass --delete-volumes)
-laconic-so --stack $stacks/gorchain deploy down
+laconic-so --stack $stacks/gorchain-rpc deploy down
 laconic-so --stack $stacks/gorchain-monitoring deploy down
 ```
 
@@ -46,11 +40,11 @@ To create a persistent deployment with filesystem-mounted data:
 
 ```bash
 # Instantiate a deployment spec based on the stack
-laconic-so --stack $stacks/gorchain deploy init --output ./spec.yml
+laconic-so --stack $stacks/gorchain-rpc deploy init --output ./spec.yml
 
 # Create a deployment directory from the spec
 # Note: SSL certificate and private key files are required
-laconic-so --stack $stacks/gorchain deploy create \
+laconic-so --stack $stacks/gorchain-rpc deploy create \
   --spec-file ./spec.yml \
   --deployment-dir ./deployment \
   -- \
