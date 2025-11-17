@@ -1,6 +1,6 @@
 services:
   agave-rpc:
-    image: gorbagana/gorchain-rpc:local
+    image: gorbagana/gorchain-rpc:latest
     restart: unless-stopped
     network_mode: host
     hostname: agave-rpc
