@@ -49,6 +49,7 @@ services:
 
   envoy-proxy:
     image: envoyproxy/envoy:v1.31-latest
+    platform: linux/amd64
     restart: unless-stopped
     hostname: envoy-proxy
     depends_on:
@@ -67,6 +68,7 @@ services:
 
   restarter:
     image: gorbagana/gorchain-restarter:local
+    platform: linux/amd64
     restart: unless-stopped
     depends_on:
       - agave-rpc
