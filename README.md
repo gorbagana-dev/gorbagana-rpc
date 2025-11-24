@@ -74,7 +74,7 @@ The tests verify:
 ## Documentation
 
 See individual stack README files:
-- [gorchain/README.md](stack-orchestrator/stacks/gorchain/README.md)
+- [gorchain/README.md](stack-orchestrator/stacks/gorchain-rpc/README.md)
 - [gorchain-monitoring/README.md](stack-orchestrator/stacks/gorchain-monitoring/README.md)
 
 ## Structure
