@@ -48,6 +48,7 @@ RPC_ARGS=(
     --accounts "$AGAVE_ACCOUNTS_DIR"
     --log -
     --full-rpc-api                                 # Full public RPC
+    --no-port-check
     --rpc-port "$RPC_PORT"
     --rpc-bind-address 0.0.0.0                     # Bind to all interfaces
     --gossip-port "$GOSSIP_PORT"

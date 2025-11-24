@@ -51,6 +51,12 @@ laconic-so --stack $stacks/gorchain-rpc deploy create \
   --certificate-file /path/to/cert.pem \
   --private-key-file /path/to/privkey.pem
 
+# Copy env
+cp stack-orchestrator/config/rpc.example.env ./deployment/config.env
+
+# Update the env as required
+nano ./deployment/config.env
+
 # Start containers
 laconic-so deployment --dir ./deployment start
 # Stop containers
