@@ -61,8 +61,8 @@ services:
       ACME_EMAIL: ${CADDY_ACME_EMAIL:+email ${CADDY_ACME_EMAIL}}
       ACME_CA: ${CADDY_ACME_CA:+acme_ca ${CADDY_ACME_CA}}
       LOG_LEVEL: ${CADDY_LOG_LEVEL:-INFO}
-      RPC_BACKEND: agave-rpc:8899
-      WS_BACKEND: agave-rpc:8900
+      RPC_BACKEND: agave-rpc:${RPC_PORT:-8899}
+      WS_BACKEND: agave-rpc:${RPC_WS_PORT:-8900}
       API_AUTH_ENABLED: ${CADDY_API_AUTH_ENABLED:-false}
     volumes:
       - ../config/gorchain/caddy-entrypoint.sh:/scripts/caddy-entrypoint.sh:ro
