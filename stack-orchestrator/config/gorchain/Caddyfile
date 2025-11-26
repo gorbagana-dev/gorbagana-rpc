@@ -1,12 +1,6 @@
 {
 	# Global configuration
-	auto_https {$CADDY_AUTO_HTTPS:on}
-
-	# Email for Let's Encrypt (only used in production mode)
-	email {$ACME_EMAIL:}
-
-	# Use Let's Encrypt staging for development/testing
-	# Comment out or set ACME_CA="" for production
+	{$ACME_EMAIL:}
 	{$ACME_CA:}
 
 	# Disable admin API in production
@@ -43,11 +37,8 @@
 		header Upgrade websocket
 	}
 	handle @websocket {
-		reverse_proxy {$WS_BACKEND:agave-rpc:8900} {
-			header_up Host {host}
+		reverse_proxy {$WS_BACKEND} {
 			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
 
 			# WebSocket settings - HTTP/1.1 only
 			transport http {
@@ -62,11 +53,8 @@
 
 	# Default RPC handler
 	handle {
-		reverse_proxy {$RPC_BACKEND:agave-rpc:8899} {
-			header_up Host {host}
+		reverse_proxy {$RPC_BACKEND} {
 			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
 
 			transport http {
 				dial_timeout {$RPC_DIAL_TIMEOUT:10s}
