@@ -11,8 +11,7 @@
 
 This will create an ephemeral deployment with data in mounted volumes for development.
 
-**Note:** this will use a self-signed development certificate by default. Create a persistent
-deployment to use a trusted TLS cert.
+**Note:** this uses self-signed certificates by default for development.
 
 ```bash
 # 1. Fetch this stack repository
@@ -43,13 +42,15 @@ To create a persistent deployment with filesystem-mounted data:
 laconic-so --stack $stacks/gorchain-rpc deploy init --output ./spec.yml
 
 # Create a deployment directory from the spec
-# Note: SSL certificate and private key files are required
 laconic-so --stack $stacks/gorchain-rpc deploy create \
   --spec-file ./spec.yml \
-  --deployment-dir ./deployment \
-  -- \
-  --certificate-file /path/to/cert.pem \
-  --private-key-file /path/to/privkey.pem
+  --deployment-dir ./deployment
+
+# Create env file in deployment
+cp stack-orchestrator/config/rpc.example.env ./deployment/config.env
+
+# Update the env as required
+nano ./deployment/config.env
 
 # Start containers
 laconic-so deployment --dir ./deployment start

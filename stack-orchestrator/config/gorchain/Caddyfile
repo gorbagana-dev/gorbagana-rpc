@@ -1,0 +1,97 @@
+{
+	# Global configuration
+	auto_https {$CADDY_AUTO_HTTPS:on}
+
+	# Email for Let's Encrypt (only used in production mode)
+	email {$ACME_EMAIL:}
+
+	# Use Let's Encrypt staging for development/testing
+	# Comment out or set ACME_CA="" for production
+	{$ACME_CA:}
+
+	# Disable admin API in production
+	admin {$CADDY_ADMIN:off}
+
+	# Server-wide settings
+	servers {
+		timeouts {
+			read_body   {$CADDY_TIMEOUT_READ_BODY:300s}
+			read_header {$CADDY_TIMEOUT_READ_HEADER:10s}
+			write       {$CADDY_TIMEOUT_WRITE:300s}
+			idle        {$CADDY_TIMEOUT_IDLE:60s}
+		}
+	}
+}
+
+# Main server block
+{$DOMAIN:localhost} {
+	# TLS configuration
+	# In dev mode: use self-signed certs
+	# In prod mode: automatic Let's Encrypt
+	{$TLS_CONFIG:}
+
+	# Logging
+	log {
+		output stdout
+		format console
+		level {$LOG_LEVEL:INFO}
+	}
+
+	# WebSocket handler for RPC subscriptions
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	handle @websocket {
+		reverse_proxy {$WS_BACKEND:agave-rpc:8900} {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+
+			# WebSocket settings - HTTP/1.1 only
+			transport http {
+				keepalive off
+				versions 1.1
+			}
+
+			# No timeout for WebSockets
+			flush_interval -1
+		}
+	}
+
+	# Default RPC handler
+	handle {
+		reverse_proxy {$RPC_BACKEND:agave-rpc:8899} {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+
+			transport http {
+				dial_timeout {$RPC_DIAL_TIMEOUT:10s}
+				response_header_timeout {$RPC_TIMEOUT:300s}
+				keepalive {$RPC_KEEPALIVE:60s}
+			}
+
+			# Health checks
+			health_uri /health
+			health_interval {$HEALTH_INTERVAL:5s}
+			health_timeout {$HEALTH_TIMEOUT:2s}
+
+			# Failure handling
+			fail_duration {$FAIL_DURATION:30s}
+			max_fails {$MAX_FAILS:3}
+			unhealthy_status 5xx
+			unhealthy_latency {$UNHEALTHY_LATENCY:30s}
+		}
+	}
+
+	# Error handling
+	handle_errors {
+		@5xx expression `{err.status_code} >= 500 && {err.status_code} < 600`
+		handle @5xx {
+			respond "Service temporarily unavailable" 503
+		}
+	}
+}
