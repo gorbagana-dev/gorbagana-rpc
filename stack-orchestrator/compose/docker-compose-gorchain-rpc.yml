@@ -51,6 +51,7 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     hostname: caddy
+    entrypoint: ["/scripts/caddy-entrypoint.sh"]
     depends_on:
       agave-rpc:
         condition: service_healthy
@@ -62,7 +63,9 @@ services:
       LOG_LEVEL: ${CADDY_LOG_LEVEL:-INFO}
       RPC_BACKEND: agave-rpc:8899
       WS_BACKEND: agave-rpc:8900
+      API_AUTH_ENABLED: ${CADDY_API_AUTH_ENABLED:-false}
     volumes:
+      - ../config/gorchain/caddy-entrypoint.sh:/scripts/caddy-entrypoint.sh:ro
       - ../config/gorchain/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config

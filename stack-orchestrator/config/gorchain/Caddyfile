@@ -31,6 +31,9 @@
 		level {$LOG_LEVEL:INFO}
 	}
 
+	# API key authentication (generated at startup if enabled)
+	import /config/auth.caddyfile
+
 	# WebSocket handler for RPC subscriptions
 	@websocket {
 		header Connection *Upgrade*
