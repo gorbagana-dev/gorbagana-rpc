@@ -2,7 +2,6 @@ services:
   agave-rpc:
     image: git.vdb.to/laconicnetwork/gorbagana/gorchain-rpc
     restart: unless-stopped
-    network_mode: host
     hostname: agave-rpc
     labels:
       - "role=rpc"
@@ -27,12 +26,11 @@ services:
       - rpc_ledger:/agave/ledger
       - rpc_accounts:/agave/accounts
     ports:
-      # This runs on the host network, so these are only for documentation
-      - "${RPC_PORT:-8899}"             # RPC
-      - "${RPC_WS_PORT:-8900}"          # RPC pubsub
-      - "${GOSSIP_PORT:-8001}"          # Gossip
-      - "${GOSSIP_PORT:-8001}/udp"      # Gossip
-      - "${DYNAMIC_PORT_RANGE:-9000-9025}/udp"     # Dynamically assigned ports
+      - "127.0.0.1:${RPC_PORT}:${RPC_PORT:-8899}"             # RPC
+      - "127.0.0.1:${RPC_WS_PORT}:${RPC_WS_PORT:-8900}"       # RPC pubsub
+      - "${GOSSIP_PORT:-8001}:${GOSSIP_PORT:-8001}/tcp"       # Gossip
+      - "${GOSSIP_PORT:-8001}:${GOSSIP_PORT:-8001}/udp"       # Gossip
+      - "${DYNAMIC_PORT_RANGE:-9000-9025}:${DYNAMIC_PORT_RANGE:-9000-9025}/udp" # Dynamically assigned ports
     ulimits:
       nofile:
         soft: 1000000
@@ -72,8 +70,6 @@ services:
     ports:
       - "${CADDY_HTTP_PORT:-80}:80"
       - "${CADDY_HTTPS_PORT:-443}:443"
-    extra_hosts:
-      - agave-rpc:host-gateway
 
   restarter:
     image: gorbagana/gorchain-restarter:local
