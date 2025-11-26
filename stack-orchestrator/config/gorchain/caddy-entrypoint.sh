@@ -16,8 +16,10 @@ if [ "${API_AUTH_ENABLED}" = "true" ]; then
         echo "==================================================================="
         echo "API Key: $API_KEY"
         echo "==================================================================="
-        echo "IMPORTANT: Save this key securely."
-        echo "The client must include this in the X-API-Key header for all requests."
+        echo "IMPORTANT: Save this key securely"
+        echo "The client can authenticate using either:"
+        echo "  1. Header (recommended): X-API-Key: <key>"
+        echo "  2. Query param: https://yourdomain.com?api_key=<key>"
         echo "To retrieve this key later: docker compose exec caddy cat /data/api_key"
         echo "==================================================================="
     else
@@ -32,9 +34,7 @@ if [ "${API_AUTH_ENABLED}" = "true" ]; then
 
     # Create auth snippet
     cat > "$AUTH_SNIPPET" <<'EOF'
-@unauthorized {
-	not header X-API-Key {env.API_KEY}
-}
+@unauthorized not expression `{header.X-API-Key} == {env.API_KEY} || {query.api_key} == {env.API_KEY}`
 handle @unauthorized {
 	respond "Unauthorized" 401
 }
