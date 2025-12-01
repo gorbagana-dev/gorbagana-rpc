@@ -38,10 +38,19 @@ laconic-so --stack $stacks/gorchain-monitoring deploy down
 To create a persistent deployment with filesystem-mounted data:
 
 ```bash
-# Instantiate a deployment spec based on the stack
+# 1. Fetch this stack repository
+git clone https://github.com/gorbagana-dev/gorbagana-rpc
+cd gorbagana-rpc
+stacks=./stack-orchestrator/stacks
+
+# 2. Build images:
+# Build all needed images
+laconic-so --stack $stacks/gorchain-rpc build-containers
+
+# 3. Instantiate a deployment spec based on the stack
 laconic-so --stack $stacks/gorchain-rpc deploy init --output ./spec.yml
 
-# Create a deployment directory from the spec
+# 4. Create a deployment directory from the spec
 laconic-so --stack $stacks/gorchain-rpc deploy create \
   --spec-file ./spec.yml \
   --deployment-dir ./deployment
@@ -52,7 +61,7 @@ cp stack-orchestrator/config/rpc.example.env ./deployment/config.env
 # Update the env as required
 nano ./deployment/config.env
 
-# Start containers
+# 5. Start containers
 laconic-so deployment --dir ./deployment start
 # Stop containers
 laconic-so deployment --dir ./deployment stop
