@@ -1,6 +1,6 @@
 services:
   agave-rpc:
-    image: gorbagana/gorchain-rpc:latest
+    image: git.vdb.to/laconicnetwork/gorbagana/gorchain-rpc
     restart: unless-stopped
     network_mode: host
     hostname: agave-rpc
