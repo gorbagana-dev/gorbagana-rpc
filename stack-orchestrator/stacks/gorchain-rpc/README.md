@@ -2,25 +2,16 @@
 
 Gorchain RPC node stack.
 
-> [!WARNING]
-> A TLS certificate is required for the Envoy proxy. When running an ephemeral cluster with `deploy
-> up`, the envoy container will use a default self-signed certificate.  This is a placeholder for
-> development purposes; for production, use certificates from a trusted CA.
-
 ## Deployment
-
-This stack has a custom `create` command that requires SSL certificate files:
 
 ```bash
 laconic-so --stack ./stack-orchestrator/stacks/gorchain-rpc deploy create \
   --spec-file spec.yml \
-  --deployment-dir ./deployment \
-  -- \
-  --certificate-file /path/to/cert.pem \
-  --private-key-file /path/to/privkey.pem
+  --deployment-dir ./deployment
 ```
 
-The certificate and private key files are copied to the deployment config directory and mounted into the Envoy proxy container for HTTPS support.
+The stack uses Caddy for HTTPS proxy with automatic certificate management.
+For development, it uses self-signed certificates by default. For production with Let's Encrypt, refer to configuration below.
 
 ## Configuration
 
@@ -40,8 +31,13 @@ Additionally:
 
 - `VALIDATOR_ENTRYPOINT`: Gossip for cluster
 - `PUBLIC_RPC_ADDRESS`: RPC address advertised to cluster over gossip. If this is not set, Agave will be started as a `--private-rpc` node, and will not advertise its RPC address or accept incoming RPC connections.
-- `ENVOY_HTTPS_PORT`, `ENVOY_HTTP_PORT`: Host ports for Envoy to listen on
 - `FAUCET_ADDRESS`: (Optional) TCP address of a faucet service to enable `requestAirdrop` RPC support.
+- `CADDY_DOMAIN`: Domain name for HTTPS (eg. `rpc.yourdomain.com`) (default: `localhost`)
+- `CADDY_TLS_CONFIG`: Set to `""` for production (uses Let's Encrypt) (default: `tls internal`, uses self-signed certs for dev)
+- `CADDY_ACME_EMAIL`: Email for Let's Encrypt certificates, required in production (eg. `admin@yourdomain.com`)
+- `CADDY_API_AUTH_ENABLED`: Set to `true` to enable API key authentication (default: `false`)
+
+**API Authentication:** Set `CADDY_API_AUTH_ENABLED=true` to auto-generate an API key. View the generated key using `laconic-so deployment --dir ./deployment exec caddy "cat /data/api_key"`.
 
 ### Automatic restarts
 

@@ -2,7 +2,6 @@ services:
   agave-rpc:
     image: git.vdb.to/laconicnetwork/gorbagana/gorchain-rpc
     restart: unless-stopped
-    network_mode: host
     hostname: agave-rpc
     labels:
       - "role=rpc"
@@ -27,12 +26,11 @@ services:
       - rpc_ledger:/agave/ledger
       - rpc_accounts:/agave/accounts
     ports:
-      # This runs on the host network, so these are only for documentation
-      - "${RPC_PORT:-8899}"             # RPC
-      - "${RPC_WS_PORT:-8900}"          # RPC pubsub
-      - "${GOSSIP_PORT:-8001}"          # Gossip
-      - "${GOSSIP_PORT:-8001}/udp"      # Gossip
-      - "${DYNAMIC_PORT_RANGE:-9000-9025}/udp"     # Dynamically assigned ports
+      - "127.0.0.1:${RPC_PORT}:${RPC_PORT:-8899}"             # RPC
+      - "127.0.0.1:${RPC_WS_PORT}:${RPC_WS_PORT:-8900}"       # RPC pubsub
+      - "${GOSSIP_PORT:-8001}:${GOSSIP_PORT:-8001}/tcp"       # Gossip
+      - "${GOSSIP_PORT:-8001}:${GOSSIP_PORT:-8001}/udp"       # Gossip
+      - "${DYNAMIC_PORT_RANGE:-9000-9025}:${DYNAMIC_PORT_RANGE:-9000-9025}/udp" # Dynamically assigned ports
     ulimits:
       nofile:
         soft: 1000000
@@ -47,23 +45,31 @@ services:
       # For convenience and documentation
       influxdb: 127.0.0.1
 
-  envoy-proxy:
-    image: envoyproxy/envoy:v1.31-latest
+  caddy:
+    image: caddy:2-alpine
     restart: unless-stopped
-    hostname: envoy-proxy
+    hostname: caddy
+    entrypoint: ["/scripts/caddy-entrypoint.sh"]
     depends_on:
       agave-rpc:
         condition: service_healthy
+    environment:
+      DOMAIN: ${CADDY_DOMAIN:-localhost}
+      TLS_CONFIG: ${CADDY_TLS_CONFIG-tls internal} # using "-" instead of ":-" to allow empty string
+      ACME_EMAIL: ${CADDY_ACME_EMAIL:+email ${CADDY_ACME_EMAIL}}
+      ACME_CA: ${CADDY_ACME_CA:+acme_ca ${CADDY_ACME_CA}}
+      LOG_LEVEL: ${CADDY_LOG_LEVEL:-INFO}
+      RPC_BACKEND: agave-rpc:${RPC_PORT:-8899}
+      WS_BACKEND: agave-rpc:${RPC_WS_PORT:-8900}
+      API_AUTH_ENABLED: ${CADDY_API_AUTH_ENABLED:-false}
     volumes:
-      - ../config/gorchain/envoy-rpc.yaml:/etc/envoy/envoy.yaml:ro
-      - ../config/gorchain/dev-certs/dev-cert.pem:/etc/envoy/tls/origin.cert.pem:ro
-      - ../config/gorchain/dev-certs/dev-private-key.pem:/etc/envoy/tls/origin.key:ro
+      - ../config/gorchain/caddy-entrypoint.sh:/scripts/caddy-entrypoint.sh:ro
+      - ../config/gorchain/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     ports:
-      - "9901:9901"
-      - "${ENVOY_HTTPS_PORT:-443}:443"
-      - "${ENVOY_HTTP_PORT:-80}:80"
-    extra_hosts:
-      - agave-rpc:host-gateway
+      - "${CADDY_HTTP_PORT:-80}:80"
+      - "${CADDY_HTTPS_PORT:-443}:443"
 
   restarter:
     image: gorbagana/gorchain-restarter:local
@@ -80,3 +86,5 @@ volumes:
   rpc_config:
   rpc_ledger:
   rpc_accounts:
+  caddy_data:
+  caddy_config:
