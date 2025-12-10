@@ -10,8 +10,7 @@ test_dir=$(readlink -f "$(dirname -- "${BASH_SOURCE[0]}")")
 test_name=$(basename "$test_dir")
 repo_root=$(readlink -f "$test_dir/../..")
 
-stack_path=$repo_root/stack-orchestrator/stacks/gorchain-rpc
-echo "stack_path" $stack_path
+stack_path=$repo_root/stack-orchestrator/stacks/gorchain
 
 log_info () {
   local message="$1"
@@ -56,13 +55,40 @@ if [ ! -f "$test_deployment_spec" ]; then
   fail_exit "deploy init test: spec file not present"
 fi
 
+# Generate test SSL certificates
+test_cert_dir=$test_workdir/certs
+mkdir -p $test_cert_dir
+log_info "Generating test SSL certificates"
+openssl req -x509 -newkey rsa:2048 -nodes \
+  -keyout $test_cert_dir/test-privkey.pem \
+  -out $test_cert_dir/test-cert.pem \
+  -days 1 \
+  -subj "/CN=test.localhost/O=Test" > /dev/null 2>&1
+
+if [ ! -f "$test_cert_dir/test-cert.pem" ] || [ ! -f "$test_cert_dir/test-privkey.pem" ]; then
+  fail_exit "SSL certificate generation failed"
+fi
+log_info "SSL certificates generated"
+
 $SO_COMMAND --stack ${stack_path} deploy create \
   --spec-file $test_deployment_spec \
-  --deployment-dir $test_deployment_dir
+  --deployment-dir $test_deployment_dir \
+  -- \
+  --certificate-file $test_cert_dir/test-cert.pem \
+  --private-key-file $test_cert_dir/test-privkey.pem
 
 # Check the deployment dir exists
 if [ ! -d "$test_deployment_dir" ]; then
   fail_exit "deploy create test: deployment directory not present"
+fi
+
+# Check SSL cert files were copied to deployment config
+if [ ! -f "$test_deployment_dir/config/certs/origin.cert.pem" ]; then
+  fail_exit "deploy create test: SSL certificate not copied to deployment config"
+fi
+
+if [ ! -f "$test_deployment_dir/config/certs/origin.key" ]; then
+  fail_exit "deploy create test: SSL private key not copied to deployment config"
 fi
 
 log_info "deploy create test: passed"
@@ -184,34 +210,34 @@ fi
 
 log_info "RPC node tests passed"
 
-# Check Caddy proxy
-log_info "Checking Caddy proxy"
+# Check envoy proxy (from host since curl isn't on envoy container)
+log_info "Checking envoy proxy"
 
-# Check HTTP endpoint (port 80) - should redirect to HTTPS
+# Check HTTP endpoint (port 80)
 if ! curl -sf http://localhost:80/health > /dev/null 2>&1; then
-  fail_exit "Caddy proxy HTTP endpoint not responding"
+  fail_exit "Envoy proxy HTTP endpoint not responding"
 fi
-log_info "Caddy proxy HTTP endpoint responding"
+log_info "Envoy proxy HTTP endpoint responding"
 
 # Check HTTPS endpoint (port 443) - use -k to skip cert verification since it's self-signed
 if ! curl -sfk https://localhost:443/health > /dev/null 2>&1; then
-  fail_exit "Caddy proxy HTTPS endpoint not responding"
+  fail_exit "Envoy proxy HTTPS endpoint not responding"
 fi
-log_info "Caddy proxy HTTPS endpoint responding"
+log_info "Envoy proxy HTTPS endpoint responding"
 
-# Test JSON-RPC through Caddy proxy
+# Test JSON-RPC through envoy proxy
 proxy_slot=$(curl -sfk -X POST -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"getSlot"}' \
   https://localhost:443 \
   | grep -o '"result":[0-9]*' | grep -o '[0-9]*' || echo "0")
 
-log_info "Caddy proxy RPC slot: $proxy_slot"
+log_info "Envoy proxy RPC slot: $proxy_slot"
 
 if [ "$proxy_slot" -eq 0 ]; then
-  fail_exit "Caddy proxy did not return valid slot number via RPC"
+  fail_exit "Envoy proxy did not return valid slot number via RPC"
 fi
 
-log_info "Caddy proxy tests passed"
+log_info "Envoy proxy tests passed"
 log_info "All tests passed"
 
 exit 0
