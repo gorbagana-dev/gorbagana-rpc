@@ -66,7 +66,7 @@ RPC_ARGS=(
     --no-incremental-snapshots
     # Restrict repair requests to the known validator
     --repair-validator "$KNOWN_VALIDATOR"
-    # Max genesis archive unpacked size 50MB
+     # Max genesis archive unpacked size 50MB
     --max-genesis-archive-unpacked-size 50000000
 )
 
