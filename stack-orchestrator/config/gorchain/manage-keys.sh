@@ -1,9 +1,12 @@
 #!/bin/sh
 set -e
 
+# Source the shared auth snippet generator
+. /scripts/generate-auth-snippet.sh
+
 API_KEYS_FILE="/data/api_keys"
 AUTH_SNIPPET="/config/auth.caddyfile"
-CADDY_ADMIN="http://localhost:2019"
+CADDY_ADMIN="http://127.0.0.1:2019"
 
 print_usage() {
     cat <<EOF
@@ -44,58 +47,29 @@ generate_key() {
 reload_caddy_config() {
     echo "Reloading Caddy configuration..."
 
-    # Re-run the auth snippet generation logic
-    if [ -f "$API_KEYS_FILE" ]; then
-        # Read all keys and export as environment variables
-        KEY_INDEX=1
-        while IFS= read -r key || [ -n "$key" ]; do
-            # Skip empty lines and comments
-            if [ -n "$key" ] && [ "${key#\#}" = "$key" ]; then
-                export "API_KEY_${KEY_INDEX}=$key"
-                KEY_INDEX=$((KEY_INDEX + 1))
-            fi
-        done < "$API_KEYS_FILE"
-
-        TOTAL_KEYS=$((KEY_INDEX - 1))
-
-        # Build the auth expression dynamically
-        AUTH_EXPR=""
-        for i in $(seq 1 $TOTAL_KEYS); do
-            if [ -n "$AUTH_EXPR" ]; then
-                AUTH_EXPR="$AUTH_EXPR || "
-            fi
-            AUTH_EXPR="${AUTH_EXPR}{header.X-API-Key} == {env.API_KEY_${i}} || {query.api_key} == {env.API_KEY_${i}}"
-        done
-
-        # Create auth snippet
-        cat > "$AUTH_SNIPPET" <<EOF
-@unauthorized not expression \`$AUTH_EXPR\`
-handle @unauthorized {
-	respond "Unauthorized" 401
-}
-EOF
-    fi
+    # Regenerate auth snippet using shared function
+    generate_auth_snippet "$API_KEYS_FILE" "$AUTH_SNIPPET"
 
     # Trigger Caddy reload via admin API
     echo "Attempting to reload via ${CADDY_ADMIN}/load..."
 
-    RELOAD_OUTPUT=$(curl -v "${CADDY_ADMIN}/load" \
-        -X POST \
-        -H "Content-Type: text/caddyfile" \
-        --data-binary @/etc/caddy/Caddyfile 2>&1)
+    RELOAD_OUTPUT=$(wget -O- --post-file=/etc/caddy/Caddyfile \
+        --header="Content-Type: text/caddyfile" \
+        "${CADDY_ADMIN}/load" 2>&1)
     RELOAD_STATUS=$?
 
     if [ $RELOAD_STATUS -eq 0 ]; then
         echo "✓ Caddy configuration reloaded successfully"
+        echo ""
+        echo "Note: If changes don't take effect, you may need to restart Caddy"
         return 0
     else
         echo "✗ Failed to reload Caddy configuration (exit code: $RELOAD_STATUS)"
         echo ""
-        echo "Curl output:"
+        echo "Error details:"
         echo "$RELOAD_OUTPUT"
         echo ""
-        echo "You may need to restart the container for changes to take effect:"
-        echo "  laconic-so deployment --dir ./deployment restart caddy"
+        echo "You may need to restart the container for changes to take effect"
         return 1
     fi
 }

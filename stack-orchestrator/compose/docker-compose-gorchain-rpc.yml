@@ -66,6 +66,7 @@ services:
     volumes:
       - ../config/gorchain/caddy-entrypoint.sh:/scripts/caddy-entrypoint.sh:ro
       - ../config/gorchain/manage-keys.sh:/scripts/manage-keys.sh:ro
+      - ../config/gorchain/generate-auth-snippet.sh:/scripts/generate-auth-snippet.sh:ro
       - ../config/gorchain/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
