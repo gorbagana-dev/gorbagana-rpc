@@ -59,15 +59,27 @@ if [ "${API_AUTH_ENABLED}" = "true" ]; then
         AUTH_EXPR="${AUTH_EXPR}{header.X-API-Key} == {env.API_KEY_${i}} || {query.api_key} == {env.API_KEY_${i}}"
     done
 
-    # Create auth snippet
-    cat > "$AUTH_SNIPPET" <<EOF
+    # Create auth snippet based on whether auth is optional or required
+    if [ "${API_AUTH_OPTIONAL}" = "true" ]; then
+        # Optional mode: if key is provided, validate it; if not provided, allow through
+        cat > "$AUTH_SNIPPET" <<EOF
+# Optional auth: allow no key, but validate if provided
+@invalid_key expression \`({header.X-API-Key} != "" || {query.api_key} != "") && !($AUTH_EXPR)\`
+handle @invalid_key {
+	respond "Invalid API Key" 401
+}
+EOF
+        echo "API authentication snippet created with $TOTAL_KEYS key(s) (OPTIONAL mode - requests allowed without keys)"
+    else
+        # Required mode: block unauthorized requests
+        cat > "$AUTH_SNIPPET" <<EOF
 @unauthorized not expression \`$AUTH_EXPR\`
 handle @unauthorized {
 	respond "Unauthorized" 401
 }
 EOF
-
-    echo "API authentication snippet created with $TOTAL_KEYS key(s)"
+        echo "API authentication snippet created with $TOTAL_KEYS key(s) (REQUIRED mode)"
+    fi
 else
     # Create empty auth snippet
     echo "" > "$AUTH_SNIPPET"

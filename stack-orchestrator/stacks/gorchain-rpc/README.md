@@ -36,6 +36,7 @@ Additionally:
 - `CADDY_TLS_CONFIG`: Set to `""` for production (uses Let's Encrypt) (default: `tls internal`, uses self-signed certs for dev)
 - `CADDY_ACME_EMAIL`: Email for Let's Encrypt certificates, required in production (eg. `admin@yourdomain.com`)
 - `CADDY_API_AUTH_ENABLED`: Set to `true` to enable API key authentication (default: `false`)
+- `CADDY_API_AUTH_OPTIONAL`: Set to `true` to allow requests without API keys (even with authentication enabled) (default: `false`)
 
 **API Authentication:** Set `CADDY_API_AUTH_ENABLED=true` to auto-generate an initial API key. Supports multiple keys with dynamic management.
 

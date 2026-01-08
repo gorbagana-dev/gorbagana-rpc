@@ -62,6 +62,7 @@ services:
       RPC_BACKEND: agave-rpc:${RPC_PORT:-8899}
       WS_BACKEND: agave-rpc:${RPC_WS_PORT:-8900}
       API_AUTH_ENABLED: ${CADDY_API_AUTH_ENABLED:-false}
+      API_AUTH_OPTIONAL: ${CADDY_API_AUTH_OPTIONAL:-false}
     volumes:
       - ../config/gorchain/caddy-entrypoint.sh:/scripts/caddy-entrypoint.sh:ro
       - ../config/gorchain/manage-keys.sh:/scripts/manage-keys.sh:ro
