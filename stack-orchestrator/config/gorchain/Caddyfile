@@ -1,18 +1,20 @@
 {
 	# Global configuration
-	{$ACME_EMAIL:}
+	# Note: Caddy formatter needs a trailing space after ACME_EMAIL
+	{$ACME_EMAIL:} 
 	{$ACME_CA:}
 
-	# Disable admin API in production
-	admin {$CADDY_ADMIN:off}
+	# Admin API for config reload (localhost only for security)
+	# Set CADDY_ADMIN=off to completely disable
+	admin {$CADDY_ADMIN:localhost:2019}
 
 	# Server-wide settings
 	servers {
 		timeouts {
-			read_body   {$CADDY_TIMEOUT_READ_BODY:300s}
+			read_body {$CADDY_TIMEOUT_READ_BODY:300s}
 			read_header {$CADDY_TIMEOUT_READ_HEADER:10s}
-			write       {$CADDY_TIMEOUT_WRITE:300s}
-			idle        {$CADDY_TIMEOUT_IDLE:60s}
+			write {$CADDY_TIMEOUT_WRITE:300s}
+			idle {$CADDY_TIMEOUT_IDLE:60s}
 		}
 	}
 }
@@ -80,7 +82,7 @@
 
 	# Error handling
 	handle_errors {
-		@5xx expression `{err.status_code} >= 500 && {err.status_code} < 600`
+		@5xx expression `{err.status_code} >= 500 && {err.status_code} <600`
 		handle @5xx {
 			respond "Service temporarily unavailable" 503
 		}

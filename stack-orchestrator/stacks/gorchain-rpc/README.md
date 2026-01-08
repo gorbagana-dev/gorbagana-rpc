@@ -37,7 +37,26 @@ Additionally:
 - `CADDY_ACME_EMAIL`: Email for Let's Encrypt certificates, required in production (eg. `admin@yourdomain.com`)
 - `CADDY_API_AUTH_ENABLED`: Set to `true` to enable API key authentication (default: `false`)
 
-**API Authentication:** Set `CADDY_API_AUTH_ENABLED=true` to auto-generate an API key. View the generated key using `laconic-so deployment --dir ./deployment exec caddy "cat /data/api_key"`.
+**API Authentication:** Set `CADDY_API_AUTH_ENABLED=true` to auto-generate an initial API key. Supports multiple keys with dynamic management.
+
+View all keys:
+```bash
+laconic-so deployment --dir ./deployment exec caddy "cat /data/api_keys"
+```
+
+Manage keys:
+```bash
+# Add a new key (auto-generated)
+laconic-so deployment --dir ./deployment exec caddy "/scripts/manage-keys.sh add"
+
+# List all keys
+laconic-so deployment --dir ./deployment exec caddy "/scripts/manage-keys.sh list"
+
+# Remove a key
+laconic-so deployment --dir ./deployment exec caddy "/scripts/manage-keys.sh remove <key>"
+```
+
+Clients authenticate using `X-API-Key` header or `api_key` query parameter.
 
 ### Automatic restarts
 

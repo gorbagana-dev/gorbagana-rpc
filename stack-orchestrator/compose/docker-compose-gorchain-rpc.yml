@@ -64,6 +64,7 @@ services:
       API_AUTH_ENABLED: ${CADDY_API_AUTH_ENABLED:-false}
     volumes:
       - ../config/gorchain/caddy-entrypoint.sh:/scripts/caddy-entrypoint.sh:ro
+      - ../config/gorchain/manage-keys.sh:/scripts/manage-keys.sh:ro
       - ../config/gorchain/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
