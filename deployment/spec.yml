@@ -5,8 +5,6 @@ network:
     gorchain-rpc:
       - '8899:8899'   # RPC port
       - '8900:8900'   # WebSocket port
-volumes:
-  gorchain-rpc-data:
-    driver: local
+volumes: {}
 configmaps:
   gorchain-config: ./config
