@@ -22,11 +22,11 @@ services:
     command: ["/opt/scripts/run.sh"]
     volumes:
       # Named volume for startup script - becomes ConfigMap in k8s
-      - rpc_scripts_config:/opt/scripts:ro
+      - rpc-scripts-config:/opt/scripts:ro
       # Data volumes
-      - rpc_config:/agave/config
-      - rpc_ledger:/agave/ledger
-      - rpc_accounts:/agave/accounts
+      - rpc-config:/agave/config
+      - rpc-ledger:/agave/ledger
+      - rpc-accounts:/agave/accounts
     ports:
       - "${RPC_PORT:-8899}"             # RPC
       - "${RPC_WS_PORT:-8900}"          # RPC pubsub
@@ -48,8 +48,8 @@ services:
 
 volumes:
   # Config volume - will become ConfigMap in k8s (contains "config" in name)
-  rpc_scripts_config:
+  rpc-scripts-config:
   # Data volumes - will become PVCs in k8s
-  rpc_config:
-  rpc_ledger:
-  rpc_accounts:
+  rpc-config:
+  rpc-ledger:
+  rpc-accounts:
