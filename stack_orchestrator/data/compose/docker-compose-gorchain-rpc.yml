@@ -2,7 +2,6 @@ services:
   agave-rpc:
     image: git.vdb.to/laconicnetwork/gorbagana/gorchain-rpc
     restart: unless-stopped
-    network_mode: host
     hostname: agave-rpc
     labels:
       - "role=rpc"
@@ -20,14 +19,15 @@ services:
       SOLANA_METRICS_CONFIG: ${SOLANA_METRICS_CONFIG}
       # Faucet address for requestAirdrop RPC (e.g., "127.0.0.1:9900")
       FAUCET_ADDRESS: ${FAUCET_ADDRESS:-}
-    command: ["/opt/run.sh"]
+    command: ["/opt/scripts/run.sh"]
     volumes:
-      - ../config/gorchain/start-rpc.sh:/opt/run.sh
+      # Named volume for startup script - becomes ConfigMap in k8s
+      - rpc_scripts_config:/opt/scripts:ro
+      # Data volumes
       - rpc_config:/agave/config
       - rpc_ledger:/agave/ledger
       - rpc_accounts:/agave/accounts
     ports:
-      # This runs on the host network, so these are only for documentation
       - "${RPC_PORT:-8899}"             # RPC
       - "${RPC_WS_PORT:-8900}"          # RPC pubsub
       - "${GOSSIP_PORT:-8001}"          # Gossip
@@ -44,21 +44,12 @@ services:
       retries: 3
       start_period: 60s
     extra_hosts:
-      # For convenience and documentation
       influxdb: 127.0.0.1
 
-  restarter:
-    image: ${RESTARTER_IMAGE:-ghcr.io/gorbagana-dev/gorchain-restarter:add-k8s-deployment-config}
-    restart: unless-stopped
-    depends_on:
-      - agave-rpc
-    command: ["/cron/restart.cron"]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ../config/gorchain/restart.cron:/cron/restart.cron:ro
-      - ../config/gorchain/restart-node.sh:/scripts/restart-node.sh:ro
-
 volumes:
+  # Config volume - will become ConfigMap in k8s (contains "config" in name)
+  rpc_scripts_config:
+  # Data volumes - will become PVCs in k8s
   rpc_config:
   rpc_ledger:
   rpc_accounts:
