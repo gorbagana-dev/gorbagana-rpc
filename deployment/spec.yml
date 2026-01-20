@@ -1,5 +1,9 @@
 stack: gorchain-rpc
 deploy-to: k8s-kind
+config:
+  VALIDATOR_ENTRYPOINT: "gorbagana.vaasl.io:8001"
+  KNOWN_VALIDATOR: "EkDhrb9ndZ2YtwPZoGipeDoJx9jsNzasHvXsRHJX2t2Y"
+  DYNAMIC_PORT_RANGE: "9022-9050"
 network:
   ports:
     gorchain-rpc:
