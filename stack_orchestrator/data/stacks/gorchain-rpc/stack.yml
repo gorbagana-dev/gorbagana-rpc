@@ -3,7 +3,9 @@ name: gorchain-rpc
 description: "Gorchain RPC node - connects to external validator"
 repos:
   - github.com/gorbagana-dev/gorbagana-rpc
-containers:
-  - gorbagana-gorchain-restarter
+# Container images are pulled from GHCR (ghcr.io/gorbagana-dev/gorchain-restarter)
+# For local development, uncomment containers and run: laconic-so build-containers
+# containers:
+#   - gorbagana-gorchain-restarter
 pods:
   - gorchain-rpc
