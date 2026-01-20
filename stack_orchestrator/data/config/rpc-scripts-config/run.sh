@@ -57,6 +57,7 @@ RPC_ARGS=(
     --enable-extended-tx-metadata-storage
     --no-wait-for-vote-to-start-leader             # Start RPC immediately
     --no-os-network-limits-test
+    --no-port-check                                  # Skip UDP port check (containerized env)
     --wal-recovery-mode skip_any_corrupted_record
     --limit-ledger-size                            # Limit disk usage
     # Snapshot configuration for RPC node bootstrap
