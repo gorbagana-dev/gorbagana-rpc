@@ -81,7 +81,6 @@ else
   RPC_ARGS+=(
     --private-rpc
     --allow-private-addr
-    --only-known-rpc            # Only bootstrap from known validators
   )
   echo "No public RPC address set, assuming private RPC node"
 fi
