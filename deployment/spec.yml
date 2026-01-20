@@ -1,0 +1,12 @@
+stack: gorchain-rpc
+deploy-to: k8s-kind
+network:
+  ports:
+    gorchain-rpc:
+      - '8899:8899'   # RPC port
+      - '8900:8900'   # WebSocket port
+volumes:
+  gorchain-rpc-data:
+    driver: local
+configmaps:
+  gorchain-config: ./config
