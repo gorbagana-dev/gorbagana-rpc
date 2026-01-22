@@ -42,6 +42,7 @@ echo "Configuring RPC node arguments..."
 RPC_ARGS=(
     --identity "$RPC_INDENTITY"
     --known-validator "$KNOWN_VALIDATOR"
+    --only-known-rpc                               # Only fetch snapshots from known validators
     --no-voting                                    # RPC node: no voting
     --entrypoint "$VALIDATOR_ENTRYPOINT"         # Connect to consensus validator
     --ledger "$AGAVE_LEDGER_DIR"
