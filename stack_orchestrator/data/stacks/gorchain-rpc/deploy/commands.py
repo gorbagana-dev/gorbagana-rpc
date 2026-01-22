@@ -4,8 +4,9 @@ from stack_orchestrator.deploy.deployment_context import DeploymentContext
 def init(deploy_command_context):
     """Return default spec content for this stack.
 
-    Provides http-proxy configuration for ingress routing.
-    The host-name can be overridden via config.
+    Provides:
+    - http-proxy configuration for ingress routing (host-name can be overridden via config)
+    - security settings for unlimited memlock (required for Solana/Agave validators)
     """
     return {
         "network": {
@@ -20,6 +21,11 @@ def init(deploy_command_context):
                     ]
                 }
             ]
+        },
+        "security": {
+            "privileged": True,
+            "unlimited-memlock": True,
+            "capabilities": ["IPC_LOCK"],
         }
     }
 
