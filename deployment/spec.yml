@@ -12,3 +12,8 @@ network:
 volumes: {}
 configmaps:
   gorchain-config: ./config
+security:
+  privileged: true
+  unlimited-memlock: true
+  capabilities:
+    - IPC_LOCK
