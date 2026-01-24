@@ -84,6 +84,7 @@ else
     --private-rpc
     --allow-private-addr
     --only-known-rpc            # Only bootstrap from known validators
+    --no-port-check             # Skip UDP port reachability check (not accessible from inside k8s)
   )
   echo "No public RPC address set, assuming private RPC node"
 fi
