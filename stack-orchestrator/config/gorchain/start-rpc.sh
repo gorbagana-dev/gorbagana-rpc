@@ -54,6 +54,9 @@ RPC_ARGS=(
     --dynamic-port-range "$DYNAMIC_PORT_RANGE"
     --enable-rpc-transaction-history
     --rpc-pubsub-enable-block-subscription
+    --account-index program-id
+    --account-index spl-token-owner
+    --account-index spl-token-mint
     --enable-extended-tx-metadata-storage
     --no-wait-for-vote-to-start-leader             # Start RPC immediately
     --no-os-network-limits-test
