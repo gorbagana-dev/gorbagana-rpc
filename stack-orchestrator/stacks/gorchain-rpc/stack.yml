@@ -1,7 +1,0 @@
-version: "1.1"
-name: gorchain-rpc
-description: "Gorchain RPC node - connects to external validator"
-containers:
-  - gorbagana-gorchain-restarter
-pods:
-  - gorchain-rpc

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gorchain-rpc-ingress
+  annotations:
+    kubernetes.io/ingress.class: caddy
+    # Let's Encrypt will automatically provision TLS
+spec:
+  tls:
+  - hosts:
+    - rpc.gorbagana.wtf
+    secretName: gorchain-rpc-tls  # Caddy will create this automatically
+  rules:
+  - host: rpc.gorbagana.wtf
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gorchain-rpc
+            port:
+              number: 8899

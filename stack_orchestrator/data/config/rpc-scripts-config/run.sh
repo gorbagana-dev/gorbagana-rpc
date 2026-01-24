@@ -42,6 +42,7 @@ echo "Configuring RPC node arguments..."
 RPC_ARGS=(
     --identity "$RPC_INDENTITY"
     --known-validator "$KNOWN_VALIDATOR"
+    --only-known-rpc                               # Only fetch snapshots from known validators
     --no-voting                                    # RPC node: no voting
     --entrypoint "$VALIDATOR_ENTRYPOINT"         # Connect to consensus validator
     --ledger "$AGAVE_LEDGER_DIR"
@@ -57,6 +58,7 @@ RPC_ARGS=(
     --enable-extended-tx-metadata-storage
     --no-wait-for-vote-to-start-leader             # Start RPC immediately
     --no-os-network-limits-test
+    --no-port-check                                  # Skip UDP port check (containerized env)
     --wal-recovery-mode skip_any_corrupted_record
     --limit-ledger-size                            # Limit disk usage
     # Snapshot configuration for RPC node bootstrap
@@ -80,7 +82,6 @@ else
   RPC_ARGS+=(
     --private-rpc
     --allow-private-addr
-    --only-known-rpc            # Only bootstrap from known validators
   )
   echo "No public RPC address set, assuming private RPC node"
 fi
