@@ -1,0 +1,91 @@
+{
+	# Global configuration
+	# Note: Caddy formatter needs a trailing space after ACME_EMAIL
+	{$ACME_EMAIL:} 
+	{$ACME_CA:}
+
+	# Admin API for config reload (localhost only for security)
+	# Set CADDY_ADMIN=off to completely disable
+	admin {$CADDY_ADMIN:localhost:2019}
+
+	# Server-wide settings
+	servers {
+    protocols h1
+		timeouts {
+			read_body {$CADDY_TIMEOUT_READ_BODY:300s}
+			read_header {$CADDY_TIMEOUT_READ_HEADER:10s}
+			write {$CADDY_TIMEOUT_WRITE:300s}
+			idle {$CADDY_TIMEOUT_IDLE:60s}
+		}
+	}
+}
+
+# Main server block
+{$DOMAIN:localhost} {
+	# TLS configuration
+	# In dev mode: use self-signed certs
+	# In prod mode: automatic Let's Encrypt
+	{$TLS_CONFIG:}
+
+	# Logging
+	log {
+		output stdout
+		format console
+		level {$LOG_LEVEL:INFO}
+	}
+
+	# API key authentication (generated at startup if enabled)
+	import /config/auth.caddyfile
+
+	# WebSocket handler for RPC subscriptions
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	handle @websocket {
+		reverse_proxy {$WS_BACKEND} {
+			header_up X-Real-IP {remote_host}
+
+			# WebSocket settings - HTTP/1.1 only
+			transport http {
+				keepalive off
+				versions 1.1
+			}
+
+			# No timeout for WebSockets
+			flush_interval -1
+		}
+	}
+
+	# Default RPC handler
+	handle {
+		reverse_proxy {$RPC_BACKEND} {
+			header_up X-Real-IP {remote_host}
+
+			transport http {
+				dial_timeout {$RPC_DIAL_TIMEOUT:10s}
+				response_header_timeout {$RPC_TIMEOUT:300s}
+				keepalive {$RPC_KEEPALIVE:60s}
+			}
+
+			# Health checks
+			health_uri /health
+			health_interval {$HEALTH_INTERVAL:5s}
+			health_timeout {$HEALTH_TIMEOUT:2s}
+
+			# Failure handling
+			fail_duration {$FAIL_DURATION:30s}
+			max_fails {$MAX_FAILS:3}
+			unhealthy_status 5xx
+			unhealthy_latency {$UNHEALTHY_LATENCY:30s}
+		}
+	}
+
+	# Error handling
+	handle_errors {
+		@5xx expression `{err.status_code} >= 500 && {err.status_code} <600`
+		handle @5xx {
+			respond "Service temporarily unavailable" 503
+		}
+	}
+}
