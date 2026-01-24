@@ -10,6 +10,7 @@
 
 	# Server-wide settings
 	servers {
+    protocols h1
 		timeouts {
 			read_body {$CADDY_TIMEOUT_READ_BODY:300s}
 			read_header {$CADDY_TIMEOUT_READ_HEADER:10s}
