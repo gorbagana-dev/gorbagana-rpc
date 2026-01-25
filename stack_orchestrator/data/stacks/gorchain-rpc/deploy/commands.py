@@ -27,7 +27,8 @@ def init(deploy_command_context):
                         }
                     ]
                 }
-            ]
+            ],
+            "acme-email": "admin@gorbagana.wtf"
         },
         "security": {
             "privileged": True,
