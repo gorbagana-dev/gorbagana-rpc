@@ -14,7 +14,7 @@ def init(deploy_command_context):
         "network": {
             "http-proxy": [
                 {
-                    "host-name": "rpc.gorbagana.wtf",
+                    "host-name": "exp.gorbagana.wtf",
                     "routes": [
                         {
                             "path": "/",
