@@ -12,6 +12,13 @@ ETCD_DB="$BACKUP_DIR/etcd/member/snap/db"
 
 # Check for required files
 if [[ ! -f "$ETCD_DB" ]]; then
+    # Check if it exists but we can't read it (permissions)
+    if [[ -d "$BACKUP_DIR/etcd/member" ]] && ! ls "$BACKUP_DIR/etcd/member" &>/dev/null; then
+        echo "Error: Cannot read etcd data (permission denied)"
+        echo "The etcd data is owned by root. Run with sudo:"
+        echo "  sudo $0 $*"
+        exit 1
+    fi
     echo "Error: etcd database not found at $ETCD_DB"
     echo "Usage: $0 <backup-dir> [output-dir]"
     exit 1
