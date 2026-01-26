@@ -45,14 +45,15 @@ else
         aarch64|arm64) ARCH="arm64" ;;
     esac
 
-    # Download latest release
-    AUGER_URL="https://github.com/etcd-io/auger/releases/latest/download/auger-${OS}-${ARCH}"
-    if ! curl -sL "$AUGER_URL" -o "$AUGER_BIN" 2>/dev/null; then
+    # Download and extract from tarball
+    AUGER_VERSION="1.0.3"
+    AUGER_URL="https://github.com/etcd-io/auger/releases/download/v${AUGER_VERSION}/auger_${AUGER_VERSION}_${OS}_${ARCH}.tar.gz"
+    if ! curl -sL "$AUGER_URL" 2>/dev/null | tar xz -C /tmp auger; then
         echo "Error: Failed to download auger from $AUGER_URL"
         echo "Install manually: go install github.com/etcd-io/auger@latest"
         exit 1
     fi
-    chmod +x "$AUGER_BIN"
+    AUGER_BIN="/tmp/auger"
     CLEANUP_AUGER=true
     echo "Installed auger to $AUGER_BIN"
 fi
@@ -68,7 +69,7 @@ trap cleanup EXIT
 
 # List certificate secrets
 echo "Searching for Caddy certificate secrets..."
-CERT_KEYS=$("$AUGER_BIN" extract -f "$ETCD_DB" --keys-only 2>/dev/null | grep -E "caddy-system.*certificates.*(\.crt|\.key)$" || true)
+CERT_KEYS=$("$AUGER_BIN" extract -f "$ETCD_DB" --template='{{.Key}}' 2>/dev/null | grep -E "/registry/secrets/caddy-system/caddy\.ingress--certificates" || true)
 
 if [[ -z "$CERT_KEYS" ]]; then
     echo "No certificate secrets found in etcd backup"

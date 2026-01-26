@@ -8,13 +8,12 @@ def init(deploy_command_context):
     Provides:
     - http-proxy configuration for ingress routing (host-name can be overridden via config)
     - security settings for unlimited memlock (required for Solana/Agave validators)
-    - caddy-data volume for certificate persistence across cluster recreation
     """
     return {
         "network": {
             "http-proxy": [
                 {
-                    "host-name": "exp.gorbagana.wtf",
+                    "host-name": "rpc.gorbagana.wtf",
                     "routes": [
                         {
                             "path": "/",
@@ -34,9 +33,6 @@ def init(deploy_command_context):
             "privileged": True,
             "unlimited-memlock": True,
             "capabilities": ["IPC_LOCK"],
-        },
-        "volumes": {
-            "caddy-data": "./data/caddy-data"
         }
     }
 
