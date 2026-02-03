@@ -13,7 +13,7 @@ def init(deploy_command_context):
         "network": {
             "http-proxy": [
                 {
-                    "host-name": "rpc.gorbagana.wtf",
+                    "host-name": "www.example.com",
                     "routes": [
                         {
                             "path": "/",
@@ -27,7 +27,7 @@ def init(deploy_command_context):
                     ]
                 }
             ],
-            "acme-email": "admin@gorbagana.wtf"
+            "acme-email": "admin@example.com"
         },
         "security": {
             "privileged": True,
