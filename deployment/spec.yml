@@ -51,10 +51,10 @@ security:
   capabilities:
     - IPC_LOCK
 volumes:
+  # Caddy certificates are stored in etcd (persisted via cluster-backups), not here
   rpc-config: ./data/rpc-config
   rpc-ledger: ./data/rpc-ledger
   rpc-accounts: ./data/rpc-accounts
-  caddy-data: ./data/caddy-data
 config:
   VALIDATOR_ENTRYPOINT: gorbagana.vaasl.io:8001
   KNOWN_VALIDATOR: WWqjqgLBUYoJH9oUaoQHo1BfoVEifeZrWeoPEwdp969
