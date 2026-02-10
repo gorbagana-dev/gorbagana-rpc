@@ -12,6 +12,13 @@ network:
         - path: /
           proxy-to: agave-rpc:8900
           websocket: true
+    - host-name: backpack.gorbagana.wtf
+      routes:
+        - path: /
+          proxy-to: agave-rpc:8899
+        - path: /
+          proxy-to: agave-rpc:8900
+          websocket: true
   acme-email: admin@gorbagana.wtf
   ports:
     agave-rpc:
