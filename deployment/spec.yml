@@ -3,6 +3,7 @@
 # Edit and commit to update the deployment
 stack: stack_orchestrator/data/stacks/gorchain-rpc
 deploy-to: k8s-kind
+namespace: laconic-rpc
 network:
   http-proxy:
     - host-name: rpc.gorbagana.wtf
