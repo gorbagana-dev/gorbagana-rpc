@@ -58,11 +58,11 @@ security:
   unlimited-memlock: true
   capabilities:
     - IPC_LOCK
+kind-mount-root: /srv/kind
 volumes:
-  # Caddy certificates are stored in etcd (persisted via cluster-backups), not here
-  rpc-config: ./data/rpc-config
-  rpc-ledger: ./data/rpc-ledger
-  rpc-accounts: ./data/rpc-accounts
+  rpc-config: /srv/kind/rpc/config
+  rpc-ledger: /srv/kind/rpc/ledger
+  rpc-accounts: /srv/kind/rpc/accounts
 config:
   VALIDATOR_ENTRYPOINT: gorbagana.vaasl.io:8001
   KNOWN_VALIDATOR: WWqjqgLBUYoJH9oUaoQHo1BfoVEifeZrWeoPEwdp969
