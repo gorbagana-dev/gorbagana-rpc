@@ -58,8 +58,13 @@ security:
   unlimited-memlock: true
   capabilities:
     - IPC_LOCK
+# kind-mount-root is kept so dumpster + trashscan stacks can bind-mount
+# their DB/redis volumes under /srv/kind (ZFS dataset). RPC's own
+# volumes stay off /srv/kind because agave's io_uring snapshot unpack
+# produces short writes on ZFS that stall bank load.
+kind-mount-root: /srv/kind
 volumes:
-  # Caddy certificates are stored in etcd (persisted via cluster-backups), not here
+  # Under deployment dir (ext4), not /srv/kind. io_uring on ext4 is fine.
   rpc-config: ./data/rpc-config
   rpc-ledger: ./data/rpc-ledger
   rpc-accounts: ./data/rpc-accounts
