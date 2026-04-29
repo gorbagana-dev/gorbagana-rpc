@@ -70,7 +70,15 @@ volumes:
   rpc-accounts: ./data/rpc-accounts
 config:
   VALIDATOR_ENTRYPOINT: gorbagana.vaasl.io:8001
-  KNOWN_VALIDATOR: WWqjqgLBUYoJH9oUaoQHo1BfoVEifeZrWeoPEwdp969
+  # Validator identity (NOT the local rpc-follower identity). The
+  # value WWqjqgLBUYoJH9oUaoQHo1BfoVEifeZrWeoPEwdp969 that lived
+  # here previously is gorbagana.vaasl.io's local rpc-follower
+  # identity — what `getIdentity` against the public 443 endpoint
+  # returns, since that endpoint is the rpc, not the validator.
+  # Combined with --only-known-rpc this caused the bootstrap to
+  # reject the actual validator gossip peer and report "Unable to
+  # find any RPC peers." See gorbagana/gor-006.
+  KNOWN_VALIDATOR: EkDhrb9ndZ2YtwPZoGipeDoJx9jsNzasHvXsRHJX2t2Y
   RUST_LOG: info
   RPC_PORT: '8899'
   GOSSIP_PORT: '8001'
