@@ -85,7 +85,17 @@ config:
   DYNAMIC_PORT_RANGE: 9000-9025
   SNAPSHOT_INTERVAL_SLOTS: '200'
   MAXIMUM_SNAPSHOTS_TO_RETAIN: '2'
-  PUBLIC_RPC_ADDRESS: ''
+  # An empty value here makes start-rpc.sh add --private-rpc instead
+  # of --public-rpc-address. agave registers the resulting node in
+  # gossip CRDS as a spy (no advertised TPU/TVU/repair/serve_repair
+  # ports) which prevents the bootstrap from progressing past
+  # genesis download — the spy never reaches the snapshot-fetch
+  # phase. Set to a non-empty value so the start script takes the
+  # public branch. The string is published into CRDS as host:port
+  # for other nodes to fetch from; rpc.gorbagana.wtf:443 is the
+  # canonical public endpoint, fronted by Caddy on woodburn.
+  # See gorbagana/gor-006.
+  PUBLIC_RPC_ADDRESS: rpc.gorbagana.wtf:443
   SOLANA_METRICS_CONFIG: ''
   FAUCET_ADDRESS: ''
 configmaps:
