@@ -68,6 +68,9 @@ volumes:
   rpc-config: ./data/rpc-config
   rpc-ledger: ./data/rpc-ledger
   rpc-accounts: ./data/rpc-accounts
+# Metrics-push credentials (INFLUXDB_WRITE_USER, INFLUXDB_WRITE_PASSWORD).
+credentials-files:
+  - ~/.credentials/gorchain-monitoring.env
 config:
   VALIDATOR_ENTRYPOINT: gorbagana.vaasl.io:8001
   # Validator identity (NOT the local rpc-follower identity). The
@@ -96,7 +99,9 @@ config:
   # canonical public endpoint, fronted by Caddy on woodburn.
   # See gorbagana/gor-006.
   PUBLIC_RPC_ADDRESS: rpc.gorbagana.wtf:443
-  SOLANA_METRICS_CONFIG: ''
+  # Empty INFLUXDB_HOST disables metrics push.
+  INFLUXDB_HOST: 'https://influxdb.gorbagana.wtf'
+  INFLUXDB_DB: 'agave_metrics'
   FAUCET_ADDRESS: ''
 configmaps:
   rpc-scripts-config: ./configmaps/rpc-scripts-config
